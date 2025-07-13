@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Fire Protection System Design</title>
@@ -60,16 +61,105 @@
   </style>
 </head>
 <body>
-  <h2>Fire Protection System Check Sheet</h2>  <!-- (input fields remain unchanged) -->  <div class="note">
+  <h2>Fire Protection System Check Sheet</h2>
+
+  <label>Hazard Class:
+    <select id="hazardClass">
+      <option value="0.1">Light Hazard (0.10 gpm/sq.ft)</option>
+      <option value="0.15">Ordinary Hazard Group 1 (0.15 gpm/sq.ft)</option>
+      <option value="0.20" selected>Ordinary Hazard Group 2 (0.20 gpm/sq.ft)</option>
+      <option value="0.3">Extra Hazard Group 1 (0.30 gpm/sq.ft)</option>
+    </select>
+  </label>
+
+  <label>Area of Sprinkler Operation (Ao) [sq.ft]:
+    <input type="number" id="area" value="1500">
+  </label>
+
+  <label>Overage Factor:
+    <input type="number" id="overage" value="1" step="0.1" min="1">
+  </label>
+
+  <label>Coverage Area per Sprinkler (As) [sq.ft]:
+    <input type="number" id="coverage" value="129.2" min="10" required>
+  </label>
+
+  <label>Spacing Between Sprinklers (S) [ft]:
+    <input type="number" id="spacingS" value="9.8" min="1" step="0.1">
+    <small>≈ <span id="s_m"></span> เมตร</small>
+  </label>
+
+  <label>Spacing Between Branch Lines (L) [ft]:
+    <input type="number" id="spacingL" value="13.1" min="1" step="0.1">
+    <small>≈ <span id="l_m"></span> เมตร</small>
+  </label>
+
+  <label>Sprinkler Head Type (UL/FM):
+    <select id="sprinklerType">
+      <option value="5.6" selected>Pendent K5.6 - Standard (UL/FM)</option>
+      <option value="8.0">Upright K8.0 - Storage (FM)</option>
+      <option value="11.2">ESFR K11.2 - Rack System (FM)</option>
+      <option value="14.0">K14.0 - High Challenge Area (FM)</option>
+    </select>
+  </label>
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div class="results" id="results"></div>
+
+  <div class="note">
     <strong>คำอธิบาย:</strong><br>
     โปรแกรมนี้เป็นเพียงส่วนหนึ่งในการช่วยพิจารณาการตรวจสอบและออกแบบเบื้องต้นเท่านั้น<br>
     * ต้องได้รับการตรวจสอบโดย วิศวกรผู้ออกแบบ ก่อนนำไปใช้<br><br>
-    🔧 ค่า Head Loss ที่ใช้ = 10 psi เป็นค่าประมาณทั่วไปที่อ้างอิงจากการสูญเสียแรงดันรวม (รวม friction loss ในท่อ, fitting, วาล์ว, และความสูง)
+    🔧 ค่า Head Loss ที่ใช้ = 10 psi เป็นค่าประมาณทั่วไปที่อ้างอิงจากการสูญเสียแรงดันรวม (รวม friction loss ในท่อ, fitting, วาล์ว, และความสูง)<br>
     ตามแนวทาง NFPA 13 และ NFPA 20 ซึ่งมักใช้ในการออกแบบเบื้องต้น หากต้องการค่าที่แม่นยำควรคำนวณจาก Hazen-Williams หรือ Darcy-Weisbach<br><br>
-    📘 อ้างอิงมาตรฐาน:
-    - NFPA 13: Standard for the Installation of Sprinkler Systems
-    - NFPA 20: Standard for the Installation of Stationary Pumps
-    - วสท. มาตรฐานระบบดับเพลิงในอาคาร
-    - พ.ร.บ. ควบคุมอาคาร พ.ศ. 2522 และฉบับแก้ไขเพิ่มเติม
-  </div>  <!-- (script section remains unchanged) --></body>
+    📘 อ้างอิงมาตรฐาน:<br>
+    - NFPA 13: Standard for the Installation of Sprinkler Systems<br>
+    - NFPA 20: Standard for the Installation of Stationary Pumps<br>
+    - วสท. มาตรฐานระบบดับเพลิงในอาคาร<br>
+    - พ.ร.บ. ควบคุมอาคาร พ.ศ. 2522 และฉบับแก้ไขเพิ่มเติม<br>
+  </div>
+
+  <script>
+    function calculate() {
+      const density = parseFloat(document.getElementById('hazardClass').value);
+      const area = parseFloat(document.getElementById('area').value);
+      const overage = parseFloat(document.getElementById('overage').value);
+      const coverage = parseFloat(document.getElementById('coverage').value);
+      const spacingS = parseFloat(document.getElementById('spacingS').value);
+      const spacingL = parseFloat(document.getElementById('spacingL').value);
+      const kFactor = parseFloat(document.getElementById('sprinklerType').value);
+
+      const headLoss = 10;
+      const sprinklerDemand = density * area * overage;
+      const hoseDemand = 250;
+      const totalDemand = sprinklerDemand + hoseDemand;
+      const sprinklerCount = area / coverage;
+      const headFlow = density * coverage;
+      const startPressurePsi = Math.pow(headFlow / kFactor, 2);
+      const requiredPressurePsi = startPressurePsi + headLoss;
+      const startPressureBar = startPressurePsi * 0.06895;
+
+      const spacingSM = spacingS * 0.3048;
+      const spacingLM = spacingL * 0.3048;
+
+      document.getElementById("s_m").textContent = spacingSM.toFixed(2);
+      document.getElementById("l_m").textContent = spacingLM.toFixed(2);
+
+      const resultHTML = `
+        <h3>Calculation Results:</h3>
+        <p><strong>Sprinkler Demand:</strong> ${sprinklerDemand.toFixed(1)} gpm</p>
+        <p><strong>Hose Demand:</strong> ${hoseDemand} gpm</p>
+        <p><strong>Total Demand:</strong> ${totalDemand.toFixed(1)} gpm</p>
+        <p><strong>Sprinklers to Operate:</strong> ${sprinklerCount.toFixed(1)} heads</p>
+        <p><strong>End Head Flow:</strong> ${headFlow.toFixed(1)} gpm</p>
+        <p><strong>Required Start Pressure:</strong> ${startPressurePsi.toFixed(1)} psi (${startPressureBar.toFixed(2)} bar)</p>
+        <p><strong>Required Total Pressure (incl. Head Loss):</strong> ${requiredPressurePsi.toFixed(1)} psi</p>
+        <p><strong>Spacing (S):</strong> ${spacingS} ft (${spacingSM.toFixed(2)} m)</p>
+        <p><strong>Spacing (L):</strong> ${spacingL} ft (${spacingLM.toFixed(2)} m)</p>
+      `;
+      document.getElementById("results").innerHTML = resultHTML;
+    }
+  </script>
+</body>
 </html>
