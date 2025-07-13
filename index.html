@@ -338,22 +338,32 @@
             updateHazardRules();
         }
 
+        // NEW: Function to lock value within a range
+        function lockValue(inputElement, min, max) {
+            let value = parseFloat(inputElement.value);
+            if (isNaN(value)) return; 
+
+            if (value > max) {
+                inputElement.value = max;
+            } else if (value < min) {
+                inputElement.value = min;
+            }
+        }
+
         function calculate() {
-            // --- Validation Rules ---
             const hazardKey = hazardSelect.value;
             const config = HAZARD_CONFIG[hazardKey];
+
+            // --- Enforce Min/Max on S and L inputs ---
+            lockValue(spacingSInput, MIN_SPACING_M, config.maxSpacing);
+            lockValue(spacingLInput, MIN_SPACING_M, config.maxSpacing);
+            
+            // --- Read potentially corrected values ---
             const spacingS_m = parseFloat(spacingSInput.value) || 0;
             const spacingL_m = parseFloat(spacingLInput.value) || 0;
             const coverageArea_sqm = spacingS_m * spacingL_m;
 
-            // Validate S, L, and Area
-            const isSInvalid = spacingS_m > config.maxSpacing || spacingS_m < MIN_SPACING_M;
-            const isLInvalid = spacingL_m > config.maxSpacing || spacingL_m < MIN_SPACING_M;
-            spacingSInput.classList.toggle('error-border', isSInvalid);
-            spacingSGuidance.classList.toggle('error', isSInvalid);
-            spacingLInput.classList.toggle('error-border', isLInvalid);
-            spacingLGuidance.classList.toggle('error', isLInvalid);
-
+            // Validate Area
             if (coverageArea_sqm > config.maxArea) {
                 areaWarning.style.display = 'block';
                 areaWarning.innerHTML = `<strong>คำเตือน:</strong> พื้นที่ ${coverageArea_sqm.toFixed(1)} m² เกินค่าสูงสุดสำหรับ ${config.name} (${config.maxArea} m²)`;
@@ -412,7 +422,15 @@
                     if (S_ft > 0) {
                         const L_required_ft = As_required_sqft / S_ft;
                         const L_required_m = L_required_ft * FT_TO_M;
-                        suggestionBox.innerHTML = `💡 **คำแนะนำ:** เพื่อให้ผ่านเกณฑ์ 7 psi ลองปรับระยะ (L) เป็น **${L_required_m.toFixed(2)}** เมตร`;
+                        
+                        if (L_required_m <= config.maxSpacing) {
+                             suggestionBox.innerHTML = `💡 **คำแนะนำ:** เพื่อให้ผ่านเกณฑ์ 7 psi ลองปรับระยะ (L) เป็น **${L_required_m.toFixed(2)}** เมตร`;
+                        } else {
+                            const L_max_ft = config.maxSpacing * M_TO_FT;
+                            const S_required_ft = As_required_sqft / L_max_ft;
+                            const S_required_m = S_required_ft * FT_TO_M;
+                            suggestionBox.innerHTML = `💡 **คำแนะนำ:** ระยะ S น้อยเกินไป ลองปรับระยะ (S) เป็น **${S_required_m.toFixed(2)}** เมตร (โดยใช้ L ที่ระยะสูงสุด ${config.maxSpacing} m)`;
+                        }
                     }
                 } else {
                      suggestionBox.style.display = 'none';
@@ -427,7 +445,9 @@
         hazardSelect.addEventListener('change', updateHazardRules);
         allInputs.forEach(input => {
             if (input.id !== 'hazard_type') {
-                input.addEventListener('input', calculate);
+                // Use 'change' event for locking to feel less aggressive than 'input'
+                input.addEventListener('change', calculate); 
+                input.addEventListener('input', calculate); // Keep for real-time calculation
             }
         });
 
