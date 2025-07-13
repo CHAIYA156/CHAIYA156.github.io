@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เครื่องคำนวณและวางแผนระบบสปริงเกอร์</title>
+    <title>การคำนวณเบื้องต้นของระบบดับเพลิงด้วยนํ้า</title>
     <style>
         :root {
             --primary-color: #005A9E;
@@ -144,7 +144,7 @@
 
     <div class="container calculator-container">
         <header>
-            <h1>เครื่องคำนวณระบบสปริงเกอร์ดับเพลิง</h1>
+            <h1>การคำนวณเบื้องต้นของระบบดับเพลิงด้วยนํ้า</h1>
             <p>อ้างอิงมาตรฐาน NFPA, FM และ วสท.</p>
         </header>
 
@@ -173,12 +173,12 @@
                     <div class="input-grid">
                         <div class="form-group">
                             <label for="spacing_s">4. ระยะห่างระหว่างหัว (S) [m]</label>
-                            <input type="number" id="spacing_s" step="0.1">
+                            <input type="number" id="spacing_s" value="3.0" step="0.1">
                             <p id="spacing_s_guidance" class="guidance-text"></p>
                         </div>
                         <div class="form-group">
                             <label for="spacing_l">5. ระยะห่างระหว่างกิ่ง (L) [m]</label>
-                            <input type="number" id="spacing_l" step="0.1">
+                            <input type="number" id="spacing_l" value="4.0" step="0.1">
                              <p id="spacing_l_guidance" class="guidance-text"></p>
                         </div>
                     </div>
@@ -196,6 +196,10 @@
                             <label for="k_factor">7. K-factor (Imperial)</label>
                             <input type="number" id="k_factor" value="5.6" step="0.1">
                         </div>
+                    </div>
+                     <div class="form-group full-width">
+                        <label for="overage_factor">8. Overage Factor</label>
+                        <input type="number" id="overage_factor" value="1.0" step="0.1">
                     </div>
                 </fieldset>
             </section>
@@ -274,6 +278,7 @@
         const GPM_TO_LPM = 4.546;
         const PSI_TO_BAR = 0.0689476;
         const MIN_SPACING_M = 1.8; // 6 ft
+        const MAX_SPACING_S_M = 3.0; // User defined max for S
 
         const HAZARD_CONFIG = {
             light: { name: 'Light Hazard', density: 0.10, area: 1500, hose: 100, maxSpacing: 4.6, maxArea: 20.9 },
@@ -295,6 +300,7 @@
         const areaWarning = document.getElementById('area_warning');
         const hoseDemandInput = document.getElementById('hose_demand');
         const kFactorInput = document.getElementById('k_factor');
+        const overageFactorInput = document.getElementById('overage_factor');
         
         const sprinklerDemandGpmEl = document.getElementById('sprinkler_demand_gpm');
         const sprinklerDemandLpmEl = document.getElementById('sprinkler_demand_lpm');
@@ -319,7 +325,7 @@
             areaOpInput.value = config.area;
             hoseDemandInput.value = config.hose;
             
-            spacingSGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
+            spacingSGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${MAX_SPACING_S_M} m)`;
             spacingLGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
 
             calculate();
@@ -334,7 +340,7 @@
             const coverageArea_sqm = spacingS_m * spacingL_m;
 
             // Validate S
-            if (spacingS_m > config.maxSpacing || spacingS_m < MIN_SPACING_M) {
+            if (spacingS_m > MAX_SPACING_S_M || spacingS_m < MIN_SPACING_M) {
                 spacingSInput.classList.add('error-border');
                 spacingSGuidance.classList.add('error');
             } else {
@@ -365,17 +371,18 @@
             const areaOp = parseFloat(areaOpInput.value) || 0;
             const hoseDemand = parseFloat(hoseDemandInput.value) || 0;
             const kFactor = parseFloat(kFactorInput.value) || 0;
+            const overageFactor = parseFloat(overageFactorInput.value) || 1;
             const coverageArea_sqft = coverageArea_sqm * M_TO_FT * M_TO_FT;
             
             coverageAreaDisplay.value = `${coverageArea_sqft.toFixed(2)} sq.ft (${coverageArea_sqm.toFixed(2)} sq.m)`;
             
-            const sprinklerDemand = density * areaOp;
+            const sprinklerDemand = density * areaOp * overageFactor; // Added Overage Factor here
             sprinklerDemandGpmEl.textContent = `${sprinklerDemand.toFixed(2)} gpm`;
-            sprinklerDemandLpmEl.textContent = `${(sprinklerDemand * GPM_TO_LPM).toFixed(0)} L/min`;
+            sprinklerDemandLpmEl.textContent = `(${(sprinklerDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
 
             const totalDemand = sprinklerDemand + hoseDemand;
             totalDemandGpmEl.textContent = `${totalDemand.toFixed(2)} gpm`;
-            totalDemandLpmEl.textContent = `${(totalDemand * GPM_TO_LPM).toFixed(0)} L/min`;
+            totalDemandLpmEl.textContent = `(${(totalDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
 
             let numSprinklers = 0;
             if (coverageArea_sqft > 0) {
@@ -386,20 +393,20 @@
             
             const endHeadFlow = density * coverageArea_sqft;
             endHeadFlowGpmEl.textContent = `${endHeadFlow.toFixed(2)} gpm`;
-            endHeadFlowLpmEl.textContent = `${(endHeadFlow * GPM_TO_LPM).toFixed(0)} L/min`;
+            endHeadFlowLpmEl.textContent = `(${(endHeadFlow * GPM_TO_LPM).toFixed(0)} L/min)`;
             
             let endHeadPressure = 0;
             if (kFactor > 0) {
                 endHeadPressure = Math.pow(endHeadFlow / kFactor, 2);
             }
             endHeadPressurePsiEl.textContent = `${endHeadPressure.toFixed(2)} psi`;
-            endHeadPressureBarEl.textContent = `${(endHeadPressure * PSI_TO_BAR).toFixed(2)} bar`;
+            endHeadPressureBarEl.textContent = `(${(endHeadPressure * PSI_TO_BAR).toFixed(2)} bar)`;
 
             pressureWarningEl.style.display = (endHeadPressure < 7 && endHeadPressure > 0) ? 'block' : 'none';
             pressureOkEl.style.display = (endHeadPressure >= 7) ? 'block' : 'none';
         }
         
-        const calculate = validateAndCalculate; // Alias for clarity
+        const calculate = validateAndCalculate;
 
         // --- EVENT LISTENERS ---
         hazardSelect.addEventListener('change', updateUIForHazard);
