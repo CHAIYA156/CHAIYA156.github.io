@@ -1,8 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Fire Protection System Design</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -40,6 +41,7 @@
       border-radius: 5px;
       font-size: 14px;
       cursor: pointer;
+      margin-right: 10px;
     }
     .results {
       margin-top: 20px;
@@ -58,56 +60,33 @@
       margin-top: 20px;
       font-size: 14px;
     }
+    #chartContainer {
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
-  <h2>Fire Protection System Check Sheet</h2>
+  <h2>Fire Protection System Check Sheet</h2><label>Hazard Class: <select id="hazardClass"> <option value="0.1">Light Hazard (0.10 gpm/sq.ft)</option> <option value="0.15">Ordinary Hazard Group 1 (0.15 gpm/sq.ft)</option> <option value="0.20" selected>Ordinary Hazard Group 2 (0.20 gpm/sq.ft)</option> <option value="0.3">Extra Hazard Group 1 (0.30 gpm/sq.ft)</option> </select> </label>
 
-  <label>Hazard Class:
-    <select id="hazardClass">
-      <option value="0.1">Light Hazard (0.10 gpm/sq.ft)</option>
-      <option value="0.15">Ordinary Hazard Group 1 (0.15 gpm/sq.ft)</option>
-      <option value="0.20" selected>Ordinary Hazard Group 2 (0.20 gpm/sq.ft)</option>
-      <option value="0.3">Extra Hazard Group 1 (0.30 gpm/sq.ft)</option>
-    </select>
-  </label>
+<label>Area of Sprinkler Operation (Ao) [sq.ft]: <input type="number" id="area" value="1500"> </label>
 
-  <label>Area of Sprinkler Operation (Ao) [sq.ft]:
-    <input type="number" id="area" value="1500">
-  </label>
+<label>Overage Factor: <input type="number" id="overage" value="1" step="0.1" min="1"> </label>
 
-  <label>Overage Factor:
-    <input type="number" id="overage" value="1" step="0.1" min="1">
-  </label>
+<label>Coverage Area per Sprinkler (As) [sq.ft]: <input type="number" id="coverage" value="129.2" min="10" required> </label>
 
-  <label>Coverage Area per Sprinkler (As) [sq.ft]:
-    <input type="number" id="coverage" value="129.2" min="10" required>
-  </label>
+<label>Spacing Between Sprinklers (S) [m]: <input type="number" id="spacingS_m" value="2.99" min="0.3" step="0.1"> </label>
 
-  <label>Spacing Between Sprinklers (S) [ft]:
-    <input type="number" id="spacingS" value="9.8" min="1" step="0.1">
-    <small>≈ <span id="s_m"></span> เมตร</small>
-  </label>
+<label>Spacing Between Branch Lines (L) [m]: <input type="number" id="spacingL_m" value="3.99" min="0.3" step="0.1"> </label>
 
-  <label>Spacing Between Branch Lines (L) [ft]:
-    <input type="number" id="spacingL" value="13.1" min="1" step="0.1">
-    <small>≈ <span id="l_m"></span> เมตร</small>
-  </label>
+<label>Sprinkler Head Type (UL/FM): <select id="sprinklerType"> <option value="5.6" selected>Pendent K5.6 - Standard (UL/FM)</option> <option value="8.0">Upright K8.0 - Storage (FM)</option> <option value="11.2">ESFR K11.2 - Rack System (FM)</option> <option value="14.0">K14.0 - High Challenge Area (FM)</option> </select> </label>
 
-  <label>Sprinkler Head Type (UL/FM):
-    <select id="sprinklerType">
-      <option value="5.6" selected>Pendent K5.6 - Standard (UL/FM)</option>
-      <option value="8.0">Upright K8.0 - Storage (FM)</option>
-      <option value="11.2">ESFR K11.2 - Rack System (FM)</option>
-      <option value="14.0">K14.0 - High Challenge Area (FM)</option>
-    </select>
-  </label>
-
-  <button onclick="calculate()">Calculate</button>
+<button onclick="calculate()">Calculate</button> <button onclick="exportPDF()">Export PDF</button>
 
   <div class="results" id="results"></div>
-
-  <div class="note">
+  <div id="chartContainer">
+    <canvas id="pumpChart" width="600" height="300"></canvas>
+    <div id="pumpSuggestion" style="margin-top:15px; font-weight:bold; color:#003366"></div>
+  </div>  <div class="note">
     <strong>คำอธิบาย:</strong><br>
     โปรแกรมนี้เป็นเพียงส่วนหนึ่งในการช่วยพิจารณาการตรวจสอบและออกแบบเบื้องต้นเท่านั้น<br>
     * ต้องได้รับการตรวจสอบโดย วิศวกรผู้ออกแบบ ก่อนนำไปใช้<br><br>
@@ -118,17 +97,18 @@
     - NFPA 20: Standard for the Installation of Stationary Pumps<br>
     - วสท. มาตรฐานระบบดับเพลิงในอาคาร<br>
     - พ.ร.บ. ควบคุมอาคาร พ.ศ. 2522 และฉบับแก้ไขเพิ่มเติม<br>
-  </div>
-
-  <script>
+  </div>  <script>
     function calculate() {
       const density = parseFloat(document.getElementById('hazardClass').value);
       const area = parseFloat(document.getElementById('area').value);
       const overage = parseFloat(document.getElementById('overage').value);
       const coverage = parseFloat(document.getElementById('coverage').value);
-      const spacingS = parseFloat(document.getElementById('spacingS').value);
-      const spacingL = parseFloat(document.getElementById('spacingL').value);
+      const spacingS_m = parseFloat(document.getElementById('spacingS_m').value);
+      const spacingL_m = parseFloat(document.getElementById('spacingL_m').value);
       const kFactor = parseFloat(document.getElementById('sprinklerType').value);
+
+      const spacingS = spacingS_m / 0.3048;
+      const spacingL = spacingL_m / 0.3048;
 
       const headLoss = 10;
       const sprinklerDemand = density * area * overage;
@@ -140,12 +120,6 @@
       const requiredPressurePsi = startPressurePsi + headLoss;
       const startPressureBar = startPressurePsi * 0.06895;
 
-      const spacingSM = spacingS * 0.3048;
-      const spacingLM = spacingL * 0.3048;
-
-      document.getElementById("s_m").textContent = spacingSM.toFixed(2);
-      document.getElementById("l_m").textContent = spacingLM.toFixed(2);
-
       const resultHTML = `
         <h3>Calculation Results:</h3>
         <p><strong>Sprinkler Demand:</strong> ${sprinklerDemand.toFixed(1)} gpm</p>
@@ -155,11 +129,84 @@
         <p><strong>End Head Flow:</strong> ${headFlow.toFixed(1)} gpm</p>
         <p><strong>Required Start Pressure:</strong> ${startPressurePsi.toFixed(1)} psi (${startPressureBar.toFixed(2)} bar)</p>
         <p><strong>Required Total Pressure (incl. Head Loss):</strong> ${requiredPressurePsi.toFixed(1)} psi</p>
-        <p><strong>Spacing (S):</strong> ${spacingS} ft (${spacingSM.toFixed(2)} m)</p>
-        <p><strong>Spacing (L):</strong> ${spacingL} ft (${spacingLM.toFixed(2)} m)</p>
+        <p><strong>Spacing (S):</strong> ${spacingS.toFixed(1)} ft (${spacingS_m.toFixed(2)} m)</p>
+        <p><strong>Spacing (L):</strong> ${spacingL.toFixed(1)} ft (${spacingL_m.toFixed(2)} m)</p>
       `;
       document.getElementById("results").innerHTML = resultHTML;
+
+      drawPumpChart(totalDemand);
+      suggestPumpSize(totalDemand);
     }
-  </script>
-</body>
+
+    function drawPumpChart(requiredFlow) {
+      const ctx = document.getElementById('pumpChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [0, 100, 200, 300, 400, 500, 600, 700],
+          datasets: [
+            {
+              label: 'Fire Pump (750 gpm)',
+              data: [150, 145, 140, 135, 130, 120, 110, 100],
+              borderColor: 'red',
+              fill: false
+            },
+            {
+              label: 'Jockey Pump (50 gpm)',
+              data: [110, 105, 100, 95, 90, 85, 80, 75],
+              borderColor: 'blue',
+              fill: false
+            },
+            {
+              label: 'Required System Pressure',
+              data: Array(8).fill(10),
+              borderDash: [5, 5],
+              borderColor: 'green',
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Fire Pump Performance Curve'
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Flow Rate (gpm)'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Pressure (psi)'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function suggestPumpSize(flow) {
+      let size = 'N/A';
+      if (flow <= 500) size = '500 gpm Fire Pump';
+      else if (flow <= 750) size = '750 gpm Fire Pump';
+      else if (flow <= 1000) size = '1000 gpm Fire Pump';
+      else size = '≥ 1250 gpm Fire Pump (Consult Engineer)';
+      document.getElementById('pumpSuggestion').innerText = `🔥 Recommended Pump Size: ${size}`;
+    }
+
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const content = document.getElementById("results").innerText;
+      doc.text(content, 10, 10);
+      doc.save("fire_protection_calculation.pdf");
+    }
+  </script></body>
 </html>
