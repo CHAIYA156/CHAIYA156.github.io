@@ -188,12 +188,12 @@
         
         .info-box, .pressure-warning, .pressure-ok, .suggestion-box { 
             margin-top: 10px; padding: 12px; border-radius: 6px; font-size: 0.9em; 
-            text-align: center; display: none; word-wrap: break-word; line-height: 1.5;
+            text-align: center; display: none; overflow-wrap: break-word; line-height: 1.5;
         }
         .info-box { background-color: #E1F5FE; border: 1px solid var(--info-color); color: #01579B; }
         .pressure-warning { background-color: #FFF3E0; border: 1px solid #FFB74D; color: #E65100; }
         .pressure-ok { background-color: #E8F5E9; border: 1px solid var(--success-color); color: var(--success-color); }
-        .suggestion-box { background-color: #E3F2FD; border: 1px solid var(--secondary-color); color: var(--primary-color); font-weight: 500; }
+        .suggestion-box { background-color: #E3F2FD; border: 1px solid var(--secondary-color); color: var(--primary-color); font-weight: 500; text-align: left; padding-left: 15px; padding-right: 15px;}
 
         .export-section {
             margin-top: 20px;
@@ -232,7 +232,14 @@
         .guidance-container p, .guidance-container ul { line-height: 1.7; }
         .guidance-container ul { list-style-type: '✓ '; padding-left: 20px; }
         .formula { background-color: #eef; font-family: monospace; padding: 10px; border-radius: 6px; text-align: center; margin: 10px 0; }
-        .print-dynamic-value { font-weight: bold; background-color: #FFFFCC; padding: 2px 6px; border-radius: 4px; border: 1px solid #E6D87A;}
+        
+        .print-dynamic-value {
+            font-weight: bold;
+            background-color: #FFFFCC !important;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #E6D87A;
+        }
 
         /* Print Styles */
         @media print {
@@ -257,6 +264,11 @@
             .print-fieldset .result-value { color: #333; }
             #print-guidance h3 { color: #333; }
             #print-guidance .formula { border: 1px solid #ccc; background-color: #f9f9f9; }
+            
+            .print-dynamic-value {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
         }
     </style>
 </head>
@@ -595,16 +607,21 @@
             document.getElementById('print-results-wrapper').innerHTML = '';
             document.getElementById('print-results-wrapper').appendChild(resultsClone).classList.add('print-fieldset');
             
-            const guidanceClone = document.querySelector('.guidance-container').cloneNode(true);
-            const totalDemandValue = allResultsMap.total_demand_gpm.textContent;
-            const endHeadPressureValue = allResultsMap.end_head_pressure_psi.textContent;
+            const guidanceParent = document.querySelector('.guidance-container');
+            if (guidanceParent) {
+                const guidanceClone = guidanceParent.cloneNode(true);
+                const totalDemandValue = allResultsMap.total_demand_gpm.textContent;
+                const endHeadPressureValue = allResultsMap.end_head_pressure_psi.textContent;
 
-            const guidanceList = guidanceClone.querySelectorAll('ul li');
-            guidanceList[0].innerHTML = `<strong>อัตราการไหล (Flow Rate):</strong> ปั๊มต้องมีอัตราการไหล (Rated Capacity) ไม่น้อยกว่าค่า "ปริมาณน้ำรวมทั้งระบบ (Total Demand)" ซึ่งคำนวณได้ <span class="print-dynamic-value">${totalDemandValue}</span>`;
-            guidanceList[1].innerHTML = `<strong>แรงดัน (Pressure Head):</strong> ปั๊มต้องสร้างแรงดันได้เพียงพอ... และยังคงเหลือแรงดันที่หัวสปริงเกอร์ตัวสุดท้ายไม่ต่ำกว่าค่าที่คำนวณได้คือ <span class="print-dynamic-value">${endHeadPressureValue}</span>`;
-            
-            document.getElementById('print-guidance-wrapper').innerHTML = '';
-            document.getElementById('print-guidance-wrapper').appendChild(guidanceClone);
+                const guidanceList = guidanceClone.querySelectorAll('ul li');
+                if (guidanceList.length >= 2) {
+                    guidanceList[0].innerHTML = `<strong>อัตราการไหล (Flow Rate):</strong> ปั๊มต้องมีอัตราการไหล (Rated Capacity) ไม่น้อยกว่าค่า "ปริมาณน้ำรวมทั้งระบบ (Total Demand)" ซึ่งคำนวณได้ <span class="print-dynamic-value">${totalDemandValue}</span>`;
+                    guidanceList[1].innerHTML = `<strong>แรงดัน (Pressure Head):</strong> ปั๊มต้องสร้างแรงดันได้เพียงพอ... และยังคงเหลือแรงดันที่หัวสปริงเกอร์ตัวสุดท้ายไม่ต่ำกว่าค่าที่คำนวณได้คือ <span class="print-dynamic-value">${endHeadPressureValue}</span>`;
+                }
+                
+                document.getElementById('print-guidance-wrapper').innerHTML = '';
+                document.getElementById('print-guidance-wrapper').appendChild(guidanceClone);
+            }
             
             window.print();
         }
