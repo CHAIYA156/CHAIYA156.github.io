@@ -186,7 +186,10 @@
         .result-value { font-size: 1.3em; font-weight: 700; color: var(--primary-color); display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
         .result-value .metric { font-size: 0.8em; font-weight: 400; color: var(--label-color); }
         
-        .info-box, .pressure-warning, .pressure-ok, .suggestion-box { margin-top: 10px; padding: 12px; border-radius: 6px; font-size: 0.9em; text-align: center; display: none; word-wrap: break-word; }
+        .info-box, .pressure-warning, .pressure-ok, .suggestion-box { 
+            margin-top: 10px; padding: 12px; border-radius: 6px; font-size: 0.9em; 
+            text-align: center; display: none; word-wrap: break-word; line-height: 1.5;
+        }
         .info-box { background-color: #E1F5FE; border: 1px solid var(--info-color); color: #01579B; }
         .pressure-warning { background-color: #FFF3E0; border: 1px solid #FFB74D; color: #E65100; }
         .pressure-ok { background-color: #E8F5E9; border: 1px solid var(--success-color); color: var(--success-color); }
@@ -444,10 +447,7 @@
             overage_factor: document.getElementById('overage_factor')
         };
         const allResultsMap = {
-            sprinkler_demand_gpm: document.getElementById('sprinkler_demand_gpm'),
             total_demand_gpm: document.getElementById('total_demand_gpm'),
-            num_sprinklers: document.getElementById('num_sprinklers'),
-            end_head_flow_gpm: document.getElementById('end_head_flow_gpm'),
             end_head_pressure_psi: document.getElementById('end_head_pressure_psi'),
         };
         const spacingSGuidance = document.getElementById('spacing_s_guidance');
@@ -463,7 +463,7 @@
         function updateHazardRules() {
             const hazardKey = allInputsMap.hazard_type.value;
             const config = HAZARD_CONFIG[hazardKey];
-            const maxSpacingText = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
+            const maxSpacingText = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing.toFixed(1)} m)`;
             spacingSGuidance.textContent = maxSpacingText;
             spacingLGuidance.textContent = maxSpacingText;
             calculate();
@@ -569,7 +569,7 @@
                             const L_max_ft = config.maxSpacing * M_TO_FT;
                             const S_required_ft = As_required_sqft / L_max_ft;
                             const S_required_m = S_required_ft * FT_TO_M;
-                            suggestionBox.innerHTML = `💡 **คำแนะนำ:** ระยะ S น้อยเกินไป ลองปรับระยะ (S) เป็น **${S_required_m.toFixed(2)}** เมตร (โดยใช้ L ที่ระยะสูงสุด ${config.maxSpacing} m)`;
+                            suggestionBox.innerHTML = `💡 **คำแนะนำ:** ระยะ S น้อยเกินไป ลองปรับระยะ (S) เป็น **${S_required_m.toFixed(2)}** เมตร (โดยใช้ L ที่ระยะสูงสุด ${config.maxSpacing.toFixed(1)} m)`;
                         }
                     }
                 } else {
@@ -582,7 +582,6 @@
         }
         
         function exportToPdf() {
-            // --- Populate Print Area ---
             document.getElementById('print-date').textContent = `วันที่จัดทำ: ${new Date().toLocaleDateString('th-TH', { day: '2-digit', month: 'long', year: 'numeric' })}`;
             
             const inputsClone = document.querySelector('#inputs fieldset').cloneNode(true);
@@ -596,7 +595,7 @@
             document.getElementById('print-results-wrapper').innerHTML = '';
             document.getElementById('print-results-wrapper').appendChild(resultsClone).classList.add('print-fieldset');
             
-            const guidanceClone = document.querySelector('.guidance-container .content').cloneNode(true);
+            const guidanceClone = document.querySelector('.guidance-container').cloneNode(true);
             const totalDemandValue = allResultsMap.total_demand_gpm.textContent;
             const endHeadPressureValue = allResultsMap.end_head_pressure_psi.textContent;
 
@@ -611,7 +610,7 @@
         }
 
         function exportToExcel() {
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // \uFEFF for BOM
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
             const data = [
                 ["หัวข้อ", "ค่าที่ใช้", "หน่วย", "คำแนะนำการใช้งานต่อ"],
                 ["ประเภทพื้นที่", allInputsMap.hazard_type.options[allInputsMap.hazard_type.selectedIndex].text, "", ""],
@@ -623,8 +622,8 @@
                 ["Hose Demand", allInputsMap.hose_demand.value, "gpm", "ปริมาณน้ำสำรองสำหรับสายฉีด"],
                 ["Overage Factor", allInputsMap.overage_factor.value, "", "ตัวคูณเผื่อความปลอดภัย (Safety Factor)"],
                 ["--- ผลการคำนวณ ---", "", "", ""],
-                ["ปริมาณน้ำรวมทั้งระบบ (Total Demand)", allResultsMap.total_demand_gpm.textContent, "", "สำคัญ: ใช้สำหรับเลือกขนาด Flow Rate ของปั๊ม (Rated Capacity)"],
-                ["แรงดันเริ่มต้นที่หัวสุดท้าย (End-Head Pressure)", allResultsMap.end_head_pressure_psi.textContent, "", "สำคัญ: ใช้เป็นแรงดันเริ่มต้น (P_หัวสุดท้าย) ในการคำนวณหา Head ของปั๊ม"]
+                ["ปริมาณน้ำรวมทั้งระบบ (Total Demand)", document.getElementById('total_demand_gpm').textContent, "", "สำคัญ: ใช้สำหรับเลือกขนาด Flow Rate ของปั๊ม (Rated Capacity)"],
+                ["แรงดันเริ่มต้นที่หัวสุดท้าย (End-Head Pressure)", document.getElementById('end_head_pressure_psi').textContent, "", "สำคัญ: ใช้เป็นแรงดันเริ่มต้น (P_หัวสุดท้าย) ในการคำนวณหา Head ของปั๊ม"]
             ];
 
             data.forEach(rowArray => {
@@ -655,7 +654,6 @@
 
         allInputsElements.forEach(input => {
             if (input.id !== 'hazard_type') {
-                input.addEventListener('change', calculate); 
                 input.addEventListener('input', calculate);
             }
         });
