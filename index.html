@@ -255,20 +255,13 @@
             <h2>การนำผลลัพธ์ไปใช้ในการออกแบบ ⚙️</h2>
             <p>ผลลัพธ์จากการคำนวณข้างต้นเป็นข้อมูลเบื้องต้นที่สำคัญสำหรับขั้นตอนต่อไปในการออกแบบระบบดับเพลิงที่สมบูรณ์</p>
             <h3>1. การเลือกเครื่องสูบน้ำดับเพลิง (Fire Pump Selection)</h3>
-            <p>หัวใจของการเลือกปั๊มคือค่า 2 ค่าหลักที่ได้จากการคำนวณ:</p>
             <ul>
-                <li><strong>อัตราการไหล (Flow Rate):</strong> ปั๊มต้องมีอัตราการไหล (Rated Capacity) ไม่น้อยกว่าค่า <strong>"ปริมาณน้ำรวมทั้งระบบ (Total Demand)"</strong> ที่คำนวณได้ โดยให้เลือกขนาดปั๊มมาตรฐานลำดับถัดไป เช่น หากคำนวณได้ 650 gpm ควรเลือกใช้ปั๊มขนาด 750 gpm</li>
+                <li><strong>อัตราการไหล (Flow Rate):</strong> ปั๊มต้องมีอัตราการไหล (Rated Capacity) ไม่น้อยกว่าค่า <strong>"ปริมาณน้ำรวมทั้งระบบ (Total Demand)"</strong> ที่คำนวณได้</li>
                 <li><strong>แรงดัน (Pressure Head):</strong> ปั๊มต้องสร้างแรงดันได้เพียงพอที่จะชดเชยความสูญเสียทั้งหมดในระบบและยังคงเหลือแรงดันที่หัวสปริงเกอร์ตัวสุดท้ายไม่ต่ำกว่าค่าที่คำนวณได้</li>
             </ul>
             <div class="formula">
                 <strong>P<sub>ปั๊ม</sub> = P<sub>หัวสุดท้าย</sub> + P<sub>แรงเสียดทาน</sub> + P<sub>ความสูง</sub> + P<sub>อุปกรณ์</sub></strong>
             </div>
-            <p>โดยเครื่องคำนวณนี้จะให้ค่า <strong>P<sub>หัวสุดท้าย</sub> (End-Head Pressure)</strong> มา ส่วนแรงดันส่วนอื่นๆ ต้องมาจากการคำนวณ Hydraulic อย่างละเอียดทั้งระบบ</p>
-            <h3>2. การกำหนดขนาดท่อและแหล่งน้ำ</h3>
-            <ul>
-                <li><strong>ขนาดท่อ:</strong> อัตราการไหลที่หัวสุดท้าย (End-Head Flow) เป็นจุดเริ่มต้นในการกำหนดขนาดท่อกิ่ง (Branch Line) แต่การคำนวณแรงเสียดทานในท่อทั้งระบบ (Friction Loss) จะเป็นตัวกำหนดขนาดท่อเมน (Main Line) ที่เหมาะสม</li>
-                <li><strong>แหล่งน้ำ:</strong> ต้องตรวจสอบว่าแหล่งน้ำ (เช่น ถังเก็บน้ำ, ประปาสาธารณะ) สามารถจ่ายน้ำได้เพียงพอทั้งในแง่ของ <strong>"ปริมาณน้ำรวม"</strong> และคง **"แรงดัน"** ได้ตลอดระยะเวลาที่มาตรฐานกำหนด (เช่น 30-120 นาที)</li>
-            </ul>
         </div>
     </div>
 
@@ -317,48 +310,55 @@
         const endHeadPressureBarEl = document.getElementById('end_head_pressure_bar');
         const pressureWarningEl = document.getElementById('pressure_warning');
         const pressureOkEl = document.getElementById('pressure_ok');
-        const suggestionBox = document.getElementById('suggestion_box'); // New element
+        const suggestionBox = document.getElementById('suggestion_box');
         const allInputs = document.querySelectorAll('#inputs input, #inputs select');
 
         // --- FUNCTIONS ---
-        function updateUIForHazard() {
+        
+        // NEW: Sets the rules based on hazard, but does NOT change user input values.
+        function updateHazardRules() {
             const hazardKey = hazardSelect.value;
             const config = HAZARD_CONFIG[hazardKey];
-
+            spacingSGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${MAX_SPACING_S_M} m)`;
+            spacingLGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
+            calculate();
+        }
+        
+        // NEW: Sets the initial default values for the form ONCE on page load.
+        function initializeForm() {
+            const initialHazardKey = 'light';
+            const config = HAZARD_CONFIG[initialHazardKey];
+            hazardSelect.value = initialHazardKey;
             densityInput.value = config.density.toFixed(2);
             areaOpInput.value = config.area;
             hoseDemandInput.value = config.hose;
+            spacingSInput.value = 3.0;
+            spacingLInput.value = 4.0;
+            kFactorInput.value = 5.6;
+            overageFactorInput.value = 1.0;
             
-            spacingSGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${MAX_SPACING_S_M} m)`;
-            spacingLGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
-
-            calculate();
+            updateHazardRules(); // Update rules and run first calculation
         }
 
-        function validateAndCalculate() {
-            // --- Validation ---
+        function calculate() {
+            // --- Validation Rules ---
             const hazardKey = hazardSelect.value;
             const config = HAZARD_CONFIG[hazardKey];
             const spacingS_m = parseFloat(spacingSInput.value) || 0;
             const spacingL_m = parseFloat(spacingLInput.value) || 0;
             const coverageArea_sqm = spacingS_m * spacingL_m;
 
-            // Validate S
+            // Validate S, L, and Area
             spacingSInput.classList.toggle('error-border', spacingS_m > MAX_SPACING_S_M || spacingS_m < MIN_SPACING_M);
             spacingSGuidance.classList.toggle('error', spacingS_m > MAX_SPACING_S_M || spacingS_m < MIN_SPACING_M);
-
-            // Validate L
             spacingLInput.classList.toggle('error-border', spacingL_m > config.maxSpacing || spacingL_m < MIN_SPACING_M);
             spacingLGuidance.classList.toggle('error', spacingL_m > config.maxSpacing || spacingL_m < MIN_SPACING_M);
-            
-            // Validate Area
             if (coverageArea_sqm > config.maxArea) {
                 areaWarning.style.display = 'block';
                 areaWarning.innerHTML = `<strong>คำเตือน:</strong> พื้นที่ ${coverageArea_sqm.toFixed(1)} m² เกินค่าสูงสุดสำหรับ ${config.name} (${config.maxArea} m²)`;
             } else {
                  areaWarning.style.display = 'none';
             }
-
 
             // --- Calculation ---
             const density = parseFloat(densityInput.value) || 0;
@@ -383,4 +383,57 @@
                 numSprinklers = areaOp / coverageArea_sqft;
             }
             numSprinklersEl.textContent = `${numSprinklers.toFixed(1)} Heads`;
-            numSprinklersRoundedEl.textContent = `(~${Math.ceil(numSprinklers)
+            numSprinklersRoundedEl.textContent = `(~${Math.ceil(numSprinklers)} Heads)`;
+            
+            const endHeadFlow = density * coverageArea_sqft;
+            endHeadFlowGpmEl.textContent = `${endHeadFlow.toFixed(2)} gpm`;
+            endHeadFlowLpmEl.textContent = `(${(endHeadFlow * GPM_TO_LPM).toFixed(0)} L/min)`;
+            
+            let endHeadPressure = 0;
+            if (kFactor > 0) {
+                endHeadPressure = Math.pow(endHeadFlow / kFactor, 2);
+            }
+            endHeadPressurePsiEl.textContent = `${endHeadPressure.toFixed(2)} psi`;
+            endHeadPressureBarEl.textContent = `(${(endHeadPressure * PSI_TO_BAR).toFixed(2)} bar)`;
+
+            // --- Check Pressure and Give Suggestion ---
+            pressureWarningEl.style.display = 'none';
+            pressureOkEl.style.display = 'none';
+            suggestionBox.style.display = 'none';
+
+            if (endHeadPressure < MIN_PRESSURE_PSI && endHeadPressure > 0) {
+                pressureWarningEl.style.display = 'block';
+                suggestionBox.style.display = 'block';
+                
+                // Calculate required Area (As) for 7 psi
+                if (density > 0) {
+                    const As_required_sqft = (kFactor * Math.sqrt(MIN_PRESSURE_PSI)) / density;
+                    const S_ft = spacingS_m * M_TO_FT;
+                    if (S_ft > 0) {
+                        const L_required_ft = As_required_sqft / S_ft;
+                        const L_required_m = L_required_ft * FT_TO_M;
+                        suggestionBox.innerHTML = `💡 **คำแนะนำ:** เพื่อให้ผ่านเกณฑ์ 7 psi ลองปรับระยะ (L) เป็น **${L_required_m.toFixed(2)}** เมตร`;
+                    }
+                } else {
+                     suggestionBox.style.display = 'none';
+                }
+
+            } else if (endHeadPressure >= MIN_PRESSURE_PSI) {
+                pressureOkEl.style.display = 'block';
+            }
+        }
+        
+        // --- EVENT LISTENERS ---
+        hazardSelect.addEventListener('change', updateHazardRules);
+        allInputs.forEach(input => {
+            if (input.id !== 'hazard_type') {
+                input.addEventListener('input', calculate);
+            }
+        });
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', initializeForm);
+
+    </script>
+</body>
+</html>
