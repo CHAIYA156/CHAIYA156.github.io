@@ -187,7 +187,7 @@
         .result-value { font-size: 1.3em; font-weight: 700; color: var(--primary-color); display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
         .result-value .metric { font-size: 0.8em; font-weight: 400; color: var(--label-color); }
         
-        .info-box, .pressure-warning, .pressure-ok, .suggestion-box { margin-top: 10px; padding: 12px; border-radius: 6px; font-size: 0.9em; text-align: center; display: none; }
+        .info-box, .pressure-warning, .pressure-ok, .suggestion-box { margin-top: 10px; padding: 12px; border-radius: 6px; font-size: 0.9em; text-align: center; display: none; word-wrap: break-word; }
         .info-box { background-color: #E1F5FE; border: 1px solid var(--info-color); color: #01579B; }
         .pressure-warning { background-color: #FFF3E0; border: 1px solid #FFB74D; color: #E65100; }
         .pressure-ok { background-color: #E8F5E9; border: 1px solid #81C784; color: var(--success-color); }
@@ -358,6 +358,13 @@
             <div class="formula">
                 <strong>P<sub>ปั๊ม</sub> = P<sub>หัวสุดท้าย</sub> + P<sub>แรงเสียดทาน</sub> + P<sub>ความสูง</sub> + P<sub>อุปกรณ์</sub></strong>
             </div>
+            <hr style="border:0; border-top: 1px solid #eee; margin: 20px 0;">
+            <h3>2. ข้อควรพิจารณาเพิ่มเติมตามมาตรฐาน NFPA และ วสท.</h3>
+            <ul>
+                <li><strong>ระยะเวลาจ่ายน้ำ (Water Supply Duration):</strong> แหล่งน้ำสำรอง (เช่น ถังเก็บน้ำ) ต้องมีขนาดใหญ่พอที่จะจ่ายน้ำในอัตรา "Total Demand" ได้ต่อเนื่องตามระยะเวลาที่กำหนด ซึ่งขึ้นอยู่กับประเภทพื้นที่อันตราย เช่น Light Hazard (30 นาที), Ordinary Hazard (60-90 นาที)</li>
+                <li><strong>ระยะห่างจากผนัง:</strong> หัวสปริงเกอร์ตัวที่ใกล้ผนังที่สุดต้องมีระยะห่างไม่เกินครึ่งหนึ่งของระยะห่างสูงสุดที่อนุญาต (Max Spacing / 2)</li>
+                <li><strong>สิ่งกีดขวาง (Obstructions):</strong> การออกแบบต้องคำนึงถึงสิ่งกีดขวาง เช่น คาน ท่อลม หรือโคมไฟ ซึ่งอาจบดบังการฉีดน้ำของหัวสปริงเกอร์</li>
+            </ul>
         </div>
     </div>
 
@@ -436,7 +443,7 @@
 
         function lockValue(inputElement, min, max) {
             let value = parseFloat(inputElement.value);
-            if (isNaN(value)) return; 
+            if (isNaN(value) || value === 0) return; 
 
             if (value > max) {
                 inputElement.value = max.toFixed(1);
