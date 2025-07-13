@@ -1,97 +1,243 @@
-<!DOCTYPE html><html lang="en">
+<!-- บันทึกไฟล์นี้เป็น fire_protection_checksheet.html -->
+<!DOCTYPE html>
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>Fire Protection System Design</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fire Protection System Check Sheet</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      margin: 0;
       padding: 20px;
     }
-    h2 {
-      background-color: #ff5733;
-      color: white;
-      padding: 10px;
-      border-radius: 5px;
+    .container {
+      background-color: #ffffff;
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 700px;
     }
-    label {
-      display: block;
-      margin-top: 10px;
+    h1, h2 {
+      color: #d9534f;
+      border-bottom: 2px solid #f0f2f5;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px 20px;
+      margin-bottom: 20px;
+    }
+    .form-grid label {
       font-weight: bold;
+      display: flex;
+      align-items: center;
     }
-    input, select {
-      padding: 5px;
-      width: 250px;
+    .form-grid input, .form-grid select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
     }
-    small {
-      display: block;
-      font-weight: normal;
-      color: #666;
-      font-size: 12px;
-      margin-top: 2px;
-    }
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
+    #calculateBtn, #resetBtn, #exportBtn {
+      width: 100%;
+      padding: 12px;
       border: none;
       border-radius: 5px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-    .results {
-      margin-top: 20px;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    .results p {
-      margin: 5px 0;
-    }
-    .note {
-      background: #fff3cd;
-      padding: 10px;
-      border-left: 5px solid #ffc107;
-      margin-top: 20px;
-      font-size: 14px;
-    }
-    .warning {
-      color: red;
+      font-size: 1.1rem;
       font-weight: bold;
-      margin-top: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s ease;
+    }
+    #calculateBtn { background-color: #5cb85c; color: white; }
+    #resetBtn { background-color: #d9534f; color: white; }
+    #exportBtn { background-color: #0275d8; color: white; }
+    #calculateBtn:hover { background-color: #4cae4c; }
+    #resetBtn:hover { background-color: #c9302c; }
+    #exportBtn:hover { background-color: #025aa5; }
+
+    .results-section, .recommendations-section {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 2px solid #f0f2f5;
+    }
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .result-item:last-child {
+      border-bottom: none;
+    }
+    .result-item span:first-child {
+      font-weight: bold;
+    }
+    .recommendations-section p {
+      background-color: #f9f9f9;
+      border-left: 5px solid #f0ad4e;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .recommendations-section p.check {
+      border-left-color: #5cb85c;
+    }
+    .recommendations-section p.warning {
+      border-left-color: #d9534f;
+    }
+    canvas {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>Fire Protection System Check Sheet</h2><label>Hazard Class: <select id="hazardClass" required> <option value="">-- Select Hazard Class --</option> <option value="0.1">Light Hazard (0.10 gpm/sq.ft)</option> <option value="0.15">Ordinary Hazard Group 1 (0.15 gpm/sq.ft)</option> <option value="0.20" selected>Ordinary Hazard Group 2 (0.20 gpm/sq.ft)</option> <option value="0.3">Extra Hazard Group 1 (0.30 gpm/sq.ft)</option> </select> </label>
 
-<label>Area of Sprinkler Operation (Ao) [sq.ft]: <input type="number" id="area" value="1500" required> <small>ห้ามเว้นว่าง</small> </label>
+<div class="container" id="content">
+  <h1>Fire Protection System Check Sheet</h1>
 
-<label>Overage Factor: <input type="number" id="overage" value="1" step="0.1" min="1" required> <small>ใช้ค่า 1 เว้นแต่มีเงื่อนไขเพิ่มความปลอดภัย</small> </label>
+  <div class="form-grid">
+    <label for="hazardClass">Hazard Class:</label>
+    <select id="hazardClass">
+      <option value="Light">Light Hazard (0.10 gpm/ft²)</option>
+      <option value="Ordinary1" selected>Ordinary Hazard Gr.1 (0.15 gpm/ft²)</option>
+      <option value="Ordinary2">Ordinary Hazard Gr.2 (0.20 gpm/ft²)</option>
+      <option value="Extra1">Extra Hazard Gr.1 (0.30 gpm/ft²)</option>
+      <option value="Extra2">Extra Hazard Gr.2 (0.40 gpm/ft²)</option>
+    </select>
 
-<label>Coverage Area per Sprinkler (As) [sq.ft]: <input type="number" id="coverage" value="129.2" min="10" required> <small>ห้ามเว้นว่าง</small> </label>
+    <label for="ao">Area of Operation (Ao) [sq.ft]:</label>
+    <input type="number" id="ao" value="1500">
 
-<label>Spacing Between Sprinklers (S) [m]: <input type="number" id="spacingS_m" value="3" min="0.3" max="3" required> <small>แนะนำ: ไม่ควรเกิน 3.0 m ตาม NFPA</small> </label>
+    <label for="spacingS">Spacing Between Sprinklers (S) [m]:</label>
+    <input type="number" id="spacingS" value="3">
 
-<label>Spacing Between Branch Lines (L) [m]: <input type="number" id="spacingL_m" value="4" min="0.3" max="4" required> <small>แนะนำ: ไม่ควรเกิน 4.0 m ตาม NFPA</small> </label>
-
-<label>Sprinkler Head Type (UL/FM): <select id="sprinklerType" required> <option value="">-- Select Sprinkler Type --</option> <option value="5.6" selected>Pendent K5.6 - Standard (UL/FM)</option> <option value="8.0">Upright K8.0 - Storage (FM)</option> <option value="11.2">ESFR K11.2 - Rack System (FM)</option> <option value="14.0">K14.0 - High Challenge Area (FM)</option> </select> </label>
-
-<button onclick="calculate()">Calculate</button> <button onclick="exportPDF()">Export PDF</button>
-
-  <div id="warningBox" class="warning"></div>
-  <div class="results" id="results"></div>  <div class="note">
-    <strong>คำแนะนำ:</strong><br>
-    🔺 กรอกข้อมูลทุกช่องที่มีเครื่องหมาย <strong>ห้ามเว้นว่าง</strong> เพื่อให้การคำนวณถูกต้อง<br>
-    🔺 ระยะ S ≤ 3.0 m และ L ≤ 4.0 m ตามข้อกำหนด NFPA<br>
-    🔺 ค่า Overage Factor ใช้ 1 หากไม่มีเงื่อนไขพิเศษในการออกแบบ<br>
-    🔺 โปรแกรมนี้เป็นเพียงแนวทางเบื้องต้นเท่านั้น<br>
-    * ต้องได้รับการตรวจสอบโดย วิศวกรผู้ออกแบบ ก่อนนำไปใช้จริง
+    <label for="spacingL">Spacing Between Branch Lines (L) [m]:</label>
+    <input type="number" id="spacingL" value="4">
   </div>
+
+  <button id="calculateBtn">Calculate</button>
+  <button id="resetBtn">Reset</button>
+  <button id="exportBtn">Export to PDF</button>
+
+  <div class="results-section" id="results" style="display:none;">
+    <h2>Calculation Results</h2>
+    <div class="result-item"><span>Coverage Area per Sprinkler (As):</span><span id="result-as"></span></div>
+    <div class="result-item"><span>Sprinklers to Operate:</span><span id="result-sprinklers"></span></div>
+    <div class="result-item"><span>Sprinkler Demand:</span><span id="result-sprinkler-demand"></span></div>
+    <div class="result-item"><span>Hose Demand:</span><span id="result-hose-demand"></span></div>
+    <div class="result-item"><span><strong>Total Demand:</strong></span><span id="result-total-demand"><strong></strong></span></div>
+  </div>
+
+  <div class="recommendations-section" id="recommendations" style="display:none;">
+    <h2>คำแนะนำ (Recommendations)</h2>
+    <p class="check" id="rec-calculated"></p>
+    <p class="check" id="rec-pump"></p>
+    <p class="warning">⚠️ ต้องได้รับการตรวจสอบโดยวิศวกรผู้ออกแบบก่อนนำไปใช้จริง</p>
+  </div>
+
+  <canvas id="demandChart" width="100%" height="250" style="display:none;"></canvas>
+</div>
+
+<script>
+  const hazardData = {
+    'Light':     { density: 0.10, hose: 100 },
+    'Ordinary1': { density: 0.15, hose: 250 },
+    'Ordinary2': { density: 0.20, hose: 250 },
+    'Extra1':    { density: 0.30, hose: 500 },
+    'Extra2':    { density: 0.40, hose: 500 }
+  };
+
+  const mToFt = 3.28084;
+  const regulatoryMinPump = 750; // gpm
+
+  function calculate() {
+    const hazardClass = document.getElementById('hazardClass').value;
+    const ao = parseFloat(document.getElementById('ao').value) || 0;
+    const spacingS = parseFloat(document.getElementById('spacingS').value) || 0;
+    const spacingL = parseFloat(document.getElementById('spacingL').value) || 0;
+
+    const as_sqft = (spacingS * mToFt) * (spacingL * mToFt);
+    const sprinklersToOperate = ao > 0 && as_sqft > 0 ? ao / as_sqft : 0;
+    const selectedHazard = hazardData[hazardClass];
+    const sprinklerDemand = selectedHazard.density * ao;
+    const hoseDemand = selectedHazard.hose;
+    const totalDemand = sprinklerDemand + hoseDemand;
+    const recommendedPumpSize = Math.max(regulatoryMinPump, totalDemand);
+
+    document.getElementById('result-as').textContent = `${as_sqft.toFixed(2)} sq.ft`;
+    document.getElementById('result-sprinklers').textContent = `${sprinklersToOperate.toFixed(1)} heads`;
+    document.getElementById('result-sprinkler-demand').textContent = `${sprinklerDemand.toFixed(1)} gpm`;
+    document.getElementById('result-hose-demand').textContent = `${hoseDemand.toFixed(1)} gpm`;
+    document.getElementById('result-total-demand').innerHTML = `<strong>${totalDemand.toFixed(1)} gpm</strong>`;
+
+    document.getElementById('rec-calculated').innerHTML = `✅ ค่าที่คำนวณได้ (Total Demand): <strong>${totalDemand.toFixed(1)} gpm</strong>`;
+    document.getElementById('rec-pump').innerHTML = `✅ ขนาด Fire Pump ที่แนะนำ: <strong>${recommendedPumpSize.toFixed(0)} gpm</strong>`;
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('recommendations').style.display = 'block';
+
+    document.getElementById('demandChart').style.display = 'block';
+    const ctx = document.getElementById('demandChart').getContext('2d');
+    if (window.demandChartInstance) window.demandChartInstance.destroy();
+    window.demandChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Total Demand', 'Minimum Pump Size'],
+        datasets: [{
+          label: 'gpm',
+          data: [totalDemand, regulatoryMinPump],
+          backgroundColor: ['#5cb85c', '#d9534f']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: true, text: 'Pump Demand vs. Minimum Requirement' }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Flow Rate (gpm)' }
+          }
+        }
+      }
+    });
+  }
+
+  function resetForm() {
+    document.getElementById('ao').value = 1500;
+    document.getElementById('spacingS').value = 3;
+    document.getElementById('spacingL').value = 4;
+    document.getElementById('hazardClass').value = "Ordinary1";
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('recommendations').style.display = 'none';
+    document.getElementById('demandChart').style.display = 'none';
+  }
+
+  function exportToPDF() {
+    const element = document.getElementById('content');
+    html2pdf().from(element).save('Fire_Protection_Check_Sheet.pdf');
+  }
+
+  document.getElementById('calculateBtn').addEventListener('click', calculate);
+  document.getElementById('resetBtn').addEventListener('click', resetForm);
+  document.getElementById('exportBtn').addEventListener('click', exportToPDF);
+</script>
+
 </body>
 </html>
