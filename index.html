@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Fire Protection System Design</title>
@@ -22,7 +21,7 @@
     }
     input {
       padding: 5px;
-      width: 120px;
+      width: 150px;
     }
     button {
       margin-top: 15px;
@@ -47,37 +46,29 @@
   </style>
 </head>
 <body>
+  <h2>Fire Protection System Check Sheet</h2><label>Density (Ds) [gpm/sq.ft]: <input type="number" id="density" value="0.20" step="0.01"> </label>
 
-  <h2>Fire Protection System Check Sheet</h2>
+<label>Area of Sprinkler Operation (Ao) [sq.ft]: <input type="number" id="area" value="1500"> </label>
 
-  <label>Density (Ds) [gpm/sq.ft]:
-    <input type="number" id="density" value="0.20" step="0.01">
-  </label>
+<label>Coverage Area per Sprinkler (As) [sq.ft]: <input type="number" id="coverage" value="129.2"> </label>
 
-  <label>Area of Sprinkler Operation (Ao) [sq.ft]:
-    <input type="number" id="area" value="1500">
-  </label>
+<label>Spacing Between Sprinklers (S) [ft]: <input type="number" id="spacingS" value="9.8"> </label>
 
-  <label>Coverage Area per Sprinkler [sq.ft]:
-    <input type="number" id="coverage" value="129.2">
-  </label>
+<label>Spacing Between Branch Lines (L) [ft]: <input type="number" id="spacingL" value="13.1"> </label>
 
-  <label>Sprinkler K-Factor:
-    <input type="number" id="kFactor" value="5.6" step="0.1">
-  </label>
+<label>Sprinkler K-Factor: <input type="number" id="kFactor" value="5.6" step="0.1"> </label>
 
-  <button onclick="calculate()">Calculate</button>
+<button onclick="calculate()">Calculate</button>
 
-  <div class="results" id="results"></div>
-
-  <script>
+  <div class="results" id="results"></div>  <script>
     function calculate() {
       const density = parseFloat(document.getElementById('density').value);
       const area = parseFloat(document.getElementById('area').value);
       const coverage = parseFloat(document.getElementById('coverage').value);
+      const spacingS = parseFloat(document.getElementById('spacingS').value);
+      const spacingL = parseFloat(document.getElementById('spacingL').value);
       const kFactor = parseFloat(document.getElementById('kFactor').value);
 
-      // Calculations
       const sprinklerDemand = density * area;
       const hoseDemand = 250;
       const totalDemand = sprinklerDemand + hoseDemand;
@@ -86,7 +77,6 @@
       const startPressurePsi = Math.pow(headFlow / kFactor, 2);
       const startPressureBar = startPressurePsi * 0.06895;
 
-      // Display Results
       const resultHTML = `
         <h3>Calculation Results:</h3>
         <p><strong>Sprinkler Demand:</strong> ${sprinklerDemand.toFixed(1)} gpm</p>
@@ -95,11 +85,12 @@
         <p><strong>Sprinklers to Operate:</strong> ${sprinklerCount.toFixed(1)} heads</p>
         <p><strong>End-Head Flow:</strong> ${headFlow.toFixed(1)} gpm</p>
         <p><strong>Start Pressure:</strong> ${startPressurePsi.toFixed(1)} psi (${startPressureBar.toFixed(2)} bar)</p>
+        <p><strong>Spacing Between Sprinklers (S):</strong> ${spacingS.toFixed(1)} ft</p>
+        <p><strong>Spacing Between Branch Lines (L):</strong> ${spacingL.toFixed(1)} ft</p>
+        <p style="font-size: 0.9em; color: #555;">* NFPA 13 mandates that the minimum pressure at any sprinkler shall be 7 psi (0.5 bar)</p>
       `;
 
       document.getElementById('results').innerHTML = resultHTML;
     }
-  </script>
-
-</body>
+  </script></body>
 </html>
