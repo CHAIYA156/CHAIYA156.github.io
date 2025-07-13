@@ -6,270 +6,96 @@
     <title>การคำนวณเบื้องต้นของระบบดับเพลิงด้วยนํ้า</title>
     <style>
         :root {
-            --primary-color: #005A9E;
-            --secondary-color: #1E88E5;
-            --background-color: #f4f7fc;
-            --card-background: #ffffff;
-            --text-color: #333333;
-            --label-color: #555555;
-            --border-color: #e0e0e0;
-            --success-color: #2E7D32;
-            --warning-color: #D32F2F;
-            --info-color: #0288D1;
-            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --primary-color: #005A9E; --secondary-color: #1E88E5; --background-color: #f4f7fc;
+            --card-background: #ffffff; --text-color: #333333; --label-color: #555555;
+            --border-color: #e0e0e0; --success-color: #2E7D32; --warning-color: #D32F2F;
+            --info-color: #0288D1; --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             --border-radius: 8px;
         }
-
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap');
-
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 900px;
-            margin-bottom: 30px;
-        }
-
-        .calculator-container, .guidance-container {
-            background-color: var(--card-background);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-        }
-
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 20px 30px;
-            text-align: center;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 1.8em;
-            font-weight: 700;
-        }
-
-        header p {
-            margin: 5px 0 0;
-            opacity: 0.9;
-        }
-
-        main {
-            padding: 30px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-        }
-
-        @media (min-width: 800px) {
-            main {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        fieldset {
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin: 0;
-            height: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-        }
-
-        legend {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: var(--primary-color);
-            padding: 0 10px;
-        }
-        
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .calculator-container { width: 100%; max-width: 900px; background-color: var(--card-background); border-radius: var(--border-radius); box-shadow: var(--box-shadow); overflow: hidden; }
+        header { background-color: var(--primary-color); color: white; padding: 20px 30px; text-align: center; }
+        header h1 { margin: 0; font-size: 1.8em; }
+        main { padding: 30px; }
+        fieldset { border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 20px; margin: 0; }
+        legend { font-size: 1.2em; font-weight: 700; color: var(--primary-color); padding: 0 10px; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
         .form-group { margin-bottom: 20px; }
-        .form-group.full-width { grid-column: 1 / -1; }
-
         label { display: block; font-weight: 500; color: var(--label-color); margin-bottom: 8px; }
-        .guidance-text { font-size: 0.8em; color: var(--label-color); margin-top: -5px; }
-        .guidance-text.error { color: var(--warning-color); font-weight: bold; }
-
-        input[type="number"], select {
-            width: 100%; padding: 10px; border: 1px solid var(--border-color);
-            border-radius: 6px; font-size: 1em; box-sizing: border-box;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        select { background-color: white; }
-        input:focus, select:focus {
-            outline: none; border-color: var(--secondary-color);
-            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2);
-        }
-        input.error-border {
-             border-color: var(--warning-color);
-             box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
-        }
-        input[readonly] { background-color: #e9ecef; cursor: not-allowed; font-weight: bold; }
-
-        .result-group { background-color: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); }
-        .result-group .label { font-weight: 500; color: var(--label-color); margin-bottom: 8px; }
-        .result-value { font-size: 1.3em; font-weight: 700; color: var(--primary-color); display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
-        .result-value .metric { font-size: 0.8em; font-weight: 400; color: var(--label-color); }
-        
-        .info-box, .pressure-warning, .pressure-ok { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 0.9em; text-align: center; display: none; }
-        .info-box { background-color: #E1F5FE; border: 1px solid var(--info-color); color: #01579B; }
-        .pressure-warning { background-color: #FFF3E0; border: 1px solid #FFB74D; color: #E65100; }
-        .pressure-ok { background-color: #E8F5E9; border: 1px solid #81C784; color: var(--success-color); }
-
-        footer { background-color: #f0f0f0; color: #777; padding: 15px 30px; font-size: 0.85em; text-align: center; }
-        
-        .guidance-container .content { padding: 20px 30px; }
-        .guidance-container h2 { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
-        .guidance-container h3 { color: var(--secondary-color); margin-top: 20px; }
-        .guidance-container p, .guidance-container ul { line-height: 1.7; }
-        .guidance-container ul { list-style-type: '✓ '; padding-left: 20px; }
-        .formula { background-color: #eef; font-family: monospace; padding: 10px; border-radius: 6px; text-align: center; margin: 10px 0; }
+        .guidance-text { font-size: 0.8em; color: var(--label-color); margin-top: 4px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1em; box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s; }
+        input:focus, select:focus { outline: none; border-color: var(--secondary-color); box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2); }
+        .target-input { border: 2px dashed var(--info-color); background-color: #eef8ff; }
+        .result-box { background-color: #f7f9fc; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .result-box h3 { text-align: center; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+        .result-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.1em; }
+        .result-item .label { color: var(--label-color); }
+        .result-item .value { font-weight: 700; color: var(--text-color); }
+        .result-item .metric { font-size: 0.9em; color: var(--label-color); margin-left: 8px; }
+        .assist-result { background-color: #E8F5E9; color: var(--success-color); border: 1px solid var(--success-color); padding: 15px; border-radius: 6px; text-align: center; font-size: 1.1em; font-weight: 500; margin-top: 15px; }
+        .pressure-warning { color: var(--warning-color); font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div class="container calculator-container">
+    <div class="calculator-container">
         <header>
             <h1>การคำนวณเบื้องต้นของระบบดับเพลิงด้วยนํ้า</h1>
-            <p>อ้างอิงมาตรฐาน NFPA, FM และ วสท.</p>
         </header>
-
         <main>
-            <section id="inputs">
-                <fieldset>
-                    <legend>ข้อมูลสำหรับคำนวณ</legend>
-                    <div class="form-group full-width">
-                        <label for="hazard_type">1. เลือกประเภทพื้นที่อันตราย (Hazard Classification)</label>
+            <fieldset>
+                <legend>ข้อมูลสำหรับคำนวณ</legend>
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label for="hazard_type">ประเภทพื้นที่</label>
                         <select id="hazard_type">
-                            <option value="light">Light Hazard (ความเสี่ยงต่ำ)</option>
-                            <option value="ordinary1">Ordinary Hazard Group 1 (ความเสี่ยงปานกลาง 1)</option>
-                            <option value="ordinary2">Ordinary Hazard Group 2 (ความเสี่ยงปานกลาง 2)</option>
-                            <option value="extra1">Extra Hazard Group 1 (ความเสี่ยงสูง 1)</option>
-                            <option value="extra2">Extra Hazard Group 2 (ความเสี่ยงสูง 2)</option>
+                            <option value="light" selected>Light Hazard</option>
+                            <option value="ordinary1">Ordinary Hazard Gr.1</option>
+                            <option value="ordinary2">Ordinary Hazard Gr.2</option>
                         </select>
                     </div>
-                    <div class="form-group full-width">
-                        <label for="density">2. ความหนาแน่นของการฉีดน้ำ (Density, Ds) [gpm/sq.ft]</label>
-                        <input type="number" id="density" step="0.01">
+                    <div class="form-group">
+                        <label for="density">Density (Ds) [gpm/sq.ft]</label>
+                        <input type="number" id="density" value="0.10" step="0.01">
                     </div>
-                    <div class="form-group full-width">
-                        <label for="area_of_operation">3. พื้นที่ปฏิบัติงาน (Ao) [sq.ft]</label>
-                        <input type="number" id="area_of_operation">
+                    <div class="form-group">
+                        <label for="spacing_s">ระยะห่าง S [m]</label>
+                        <input type="number" id="spacing_s" value="3.0" step="0.1">
                     </div>
-                    <div class="input-grid">
-                        <div class="form-group">
-                            <label for="spacing_s">4. ระยะห่างระหว่างหัว (S) [m]</label>
-                            <input type="number" id="spacing_s" value="3.0" step="0.1">
-                            <p id="spacing_s_guidance" class="guidance-text"></p>
-                        </div>
-                        <div class="form-group">
-                            <label for="spacing_l">5. ระยะห่างระหว่างกิ่ง (L) [m]</label>
-                            <input type="number" id="spacing_l" value="4.0" step="0.1">
-                             <p id="spacing_l_guidance" class="guidance-text"></p>
-                        </div>
+                    <div class="form-group">
+                        <label for="spacing_l">ระยะห่าง L [m]</label>
+                        <input type="number" id="spacing_l" value="4.4" step="0.1">
                     </div>
-                    <div class="form-group full-width">
-                        <label for="coverage_area_display">พื้นที่ครอบคลุมต่อหัว (As)</label>
-                        <input type="text" id="coverage_area_display" readonly>
-                        <div id="area_warning" class="info-box"></div>
+                     <div class="form-group">
+                        <label for="k_factor">K-Factor</label>
+                        <input type="number" id="k_factor" value="5.6" step="0.1">
                     </div>
-                     <div class="input-grid">
-                        <div class="form-group">
-                            <label for="hose_demand">6. น้ำสำรองสายฉีด [gpm]</label>
-                            <input type="number" id="hose_demand" step="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="k_factor">7. K-factor (Imperial)</label>
-                            <input type="number" id="k_factor" value="5.6" step="0.1">
-                        </div>
+                    <div class="form-group">
+                        <label for="target_pressure">แรงดันเป้าหมาย [psi]</label>
+                        <input type="number" id="target_pressure" class="target-input" placeholder="ใส่ค่า 7 เพื่อช่วยออกแบบ" step="0.1">
                     </div>
-                     <div class="form-group full-width">
-                        <label for="overage_factor">8. Overage Factor</label>
-                        <input type="number" id="overage_factor" value="1.0" step="0.1">
-                    </div>
-                </fieldset>
-            </section>
+                </div>
+            </fieldset>
 
-            <section id="results">
-                <fieldset>
-                    <legend>ผลการคำนวณ</legend>
-                    <div class="result-group form-group">
-                        <div class="label">ปริมาณน้ำที่ระบบต้องการ (Sprinkler System Demand)</div>
-                        <div class="result-value">
-                            <span id="sprinkler_demand_gpm"></span><span class="metric" id="sprinkler_demand_lpm"></span>
-                        </div>
-                    </div>
-                    <div class="result-group form-group">
-                        <div class="label">ปริมาณน้ำรวมทั้งระบบ (Total Demand)</div>
-                        <div class="result-value">
-                            <span id="total_demand_gpm"></span><span class="metric" id="total_demand_lpm"></span>
-                        </div>
-                    </div>
-                     <div class="result-group form-group">
-                        <div class="label">จำนวนหัวสปริงเกอร์ที่ทำงาน</div>
-                        <div class="result-value">
-                            <span id="num_sprinklers"></span><span class="metric" id="num_sprinklers_rounded"></span>
-                        </div>
-                    </div>
-                    <div class="result-group form-group">
-                        <div class="label">อัตราการไหลที่หัวสุดท้าย (End-Head Flow)</div>
-                        <div class="result-value">
-                            <span id="end_head_flow_gpm"></span><span class="metric" id="end_head_flow_lpm"></span>
-                        </div>
-                    </div>
-                    <div class="result-group form-group">
-                        <div class="label">แรงดันเริ่มต้นที่หัวสุดท้าย (End-Head Start Pressure)</div>
-                        <div class="result-value">
-                            <span id="end_head_pressure_psi"></span><span class="metric" id="end_head_pressure_bar"></span>
-                        </div>
-                        <div id="pressure_warning" class="pressure-warning">
-                            <strong>คำเตือน:</strong> แรงดันต่ำกว่า 7 psi (0.5 bar) ซึ่งไม่เป็นไปตามข้อกำหนดขั้นต่ำของ NFPA
-                        </div>
-                        <div id="pressure_ok" class="pressure-ok">
-                            <strong>✓</strong> แรงดันเป็นไปตามข้อกำหนดขั้นต่ำของ NFPA
-                        </div>
-                    </div>
-                </fieldset>
-            </section>
-        </main>
-    </div>
+            <div style="height: 30px;"></div>
 
-    <div class="container guidance-container">
-        <div class="content">
-            <h2>การนำผลลัพธ์ไปใช้ในการออกแบบ ⚙️</h2>
-            <p>ผลลัพธ์จากการคำนวณข้างต้นเป็นข้อมูลเบื้องต้นที่สำคัญสำหรับขั้นตอนต่อไปในการออกแบบระบบดับเพลิงที่สมบูรณ์</p>
-            
-            <h3>1. การเลือกเครื่องสูบน้ำดับเพลิง (Fire Pump Selection)</h3>
-            <p>หัวใจของการเลือกปั๊มคือค่า 2 ค่าหลักที่ได้จากการคำนวณ:</p>
-            <ul>
-                <li><strong>อัตราการไหล (Flow Rate):</strong> ปั๊มต้องมีอัตราการไหล (Rated Capacity) ไม่น้อยกว่าค่า <strong>"ปริมาณน้ำรวมทั้งระบบ (Total Demand)"</strong> ที่คำนวณได้ โดยให้เลือกขนาดปั๊มมาตรฐานลำดับถัดไป เช่น หากคำนวณได้ 650 gpm ควรเลือกใช้ปั๊มขนาด 750 gpm</li>
-                <li><strong>แรงดัน (Pressure Head):</strong> ปั๊มต้องสร้างแรงดันได้เพียงพอที่จะชดเชยความสูญเสียทั้งหมดในระบบและยังคงเหลือแรงดันที่หัวสปริงเกอร์ตัวสุดท้ายไม่ต่ำกว่าค่าที่คำนวณได้</li>
-            </ul>
-            <div class="formula">
-                <strong>P<sub>ปั๊ม</sub> = P<sub>หัวสุดท้าย</sub> + P<sub>แรงเสียดทาน</sub> + P<sub>ความสูง</sub> + P<sub>อุปกรณ์</sub></strong>
+            <div class="result-box">
+                <h3>ผลการคำนวณ</h3>
+                <div class="result-item">
+                    <span class="label">พื้นที่ครอบคลุมต่อหัว (As)</span>
+                    <span class="value" id="coverage_area"></span>
+                </div>
+                 <div class="result-item">
+                    <span class="label">อัตราการไหลที่หัวสุดท้าย (Flow)</span>
+                    <span class="value"><span id="end_head_flow_gpm"></span> <span class="metric" id="end_head_flow_lpm"></span></span>
+                </div>
+                <div class="result-item">
+                    <span class="label">แรงดันที่คำนวณได้ (Pressure)</span>
+                    <span class="value"><span id="end_head_pressure_psi"></span> <span class="metric" id="end_head_pressure_bar"></span></span>
+                </div>
+                <div id="assist_result_box" class="assist-result" style="display: none;"></div>
             </div>
-            <p>โดยเครื่องคำนวณนี้จะให้ค่า <strong>P<sub>หัวสุดท้าย</sub> (End-Head Pressure)</strong> มา ส่วนแรงดันส่วนอื่นๆ ต้องมาจากการคำนวณ Hydraulic อย่างละเอียดทั้งระบบ</p>
-            
-            <h3>2. การกำหนดขนาดท่อและแหล่งน้ำ</h3>
-            <ul>
-                <li><strong>ขนาดท่อ:</strong> อัตราการไหลที่หัวสุดท้าย (End-Head Flow) เป็นจุดเริ่มต้นในการกำหนดขนาดท่อกิ่ง (Branch Line) แต่การคำนวณแรงเสียดทานในท่อทั้งระบบ (Friction Loss) จะเป็นตัวกำหนดขนาดท่อเมน (Main Line) ที่เหมาะสม</li>
-                <li><strong>แหล่งน้ำ:</strong> ต้องตรวจสอบว่าแหล่งน้ำ (เช่น ถังเก็บน้ำ, ประปาสาธารณะ) สามารถจ่ายน้ำได้เพียงพอทั้งในแง่ของ <strong>"ปริมาณน้ำรวม"</strong> และคง **"แรงดัน"** ได้ตลอดระยะเวลาที่มาตรฐานกำหนด (เช่น 30-120 นาที)</li>
-            </ul>
-        </div>
+        </main>
     </div>
 
     <script>
@@ -277,146 +103,85 @@
         const M_TO_FT = 3.28084;
         const GPM_TO_LPM = 4.546;
         const PSI_TO_BAR = 0.0689476;
-        const MIN_SPACING_M = 1.8; // 6 ft
-        const MAX_SPACING_S_M = 3.0; // User defined max for S
-
-        const HAZARD_CONFIG = {
-            light: { name: 'Light Hazard', density: 0.10, area: 1500, hose: 100, maxSpacing: 4.6, maxArea: 20.9 },
-            ordinary1: { name: 'Ordinary Hazard Gr.1', density: 0.15, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1 },
-            ordinary2: { name: 'Ordinary Hazard Gr.2', density: 0.20, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1 },
-            extra1: { name: 'Extra Hazard Gr.1', density: 0.30, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3 },
-            extra2: { name: 'Extra Hazard Gr.2', density: 0.40, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3 }
-        };
+        const SQM_TO_SQFT = M_TO_FT * M_TO_FT;
 
         // --- DOM ELEMENTS ---
-        const hazardSelect = document.getElementById('hazard_type');
         const densityInput = document.getElementById('density');
-        const areaOpInput = document.getElementById('area_of_operation');
         const spacingSInput = document.getElementById('spacing_s');
         const spacingLInput = document.getElementById('spacing_l');
-        const spacingSGuidance = document.getElementById('spacing_s_guidance');
-        const spacingLGuidance = document.getElementById('spacing_l_guidance');
-        const coverageAreaDisplay = document.getElementById('coverage_area_display');
-        const areaWarning = document.getElementById('area_warning');
-        const hoseDemandInput = document.getElementById('hose_demand');
         const kFactorInput = document.getElementById('k_factor');
-        const overageFactorInput = document.getElementById('overage_factor');
+        const targetPressureInput = document.getElementById('target_pressure');
         
-        const sprinklerDemandGpmEl = document.getElementById('sprinkler_demand_gpm');
-        const sprinklerDemandLpmEl = document.getElementById('sprinkler_demand_lpm');
-        const totalDemandGpmEl = document.getElementById('total_demand_gpm');
-        const totalDemandLpmEl = document.getElementById('total_demand_lpm');
-        const numSprinklersEl = document.getElementById('num_sprinklers');
-        const numSprinklersRoundedEl = document.getElementById('num_sprinklers_rounded');
+        const coverageAreaEl = document.getElementById('coverage_area');
         const endHeadFlowGpmEl = document.getElementById('end_head_flow_gpm');
         const endHeadFlowLpmEl = document.getElementById('end_head_flow_lpm');
         const endHeadPressurePsiEl = document.getElementById('end_head_pressure_psi');
         const endHeadPressureBarEl = document.getElementById('end_head_pressure_bar');
-        const pressureWarningEl = document.getElementById('pressure_warning');
-        const pressureOkEl = document.getElementById('pressure_ok');
-        const allInputs = document.querySelectorAll('#inputs input, #inputs select');
-
-        // --- FUNCTIONS ---
-        function updateUIForHazard() {
-            const hazardKey = hazardSelect.value;
-            const config = HAZARD_CONFIG[hazardKey];
-
-            densityInput.value = config.density.toFixed(2);
-            areaOpInput.value = config.area;
-            hoseDemandInput.value = config.hose;
-            
-            spacingSGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${MAX_SPACING_S_M} m)`;
-            spacingLGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
-
-            calculate();
-        }
-
-        function validateAndCalculate() {
-            // --- Validation ---
-            const hazardKey = hazardSelect.value;
-            const config = HAZARD_CONFIG[hazardKey];
-            const spacingS_m = parseFloat(spacingSInput.value) || 0;
-            const spacingL_m = parseFloat(spacingLInput.value) || 0;
-            const coverageArea_sqm = spacingS_m * spacingL_m;
-
-            // Validate S
-            if (spacingS_m > MAX_SPACING_S_M || spacingS_m < MIN_SPACING_M) {
-                spacingSInput.classList.add('error-border');
-                spacingSGuidance.classList.add('error');
-            } else {
-                spacingSInput.classList.remove('error-border');
-                spacingSGuidance.classList.remove('error');
-            }
-
-            // Validate L
-            if (spacingL_m > config.maxSpacing || spacingL_m < MIN_SPACING_M) {
-                spacingLInput.classList.add('error-border');
-                spacingLGuidance.classList.add('error');
-            } else {
-                spacingLInput.classList.remove('error-border');
-                spacingLGuidance.classList.remove('error');
-            }
-            
-            // Validate Area
-            if (coverageArea_sqm > config.maxArea) {
-                areaWarning.style.display = 'block';
-                areaWarning.innerHTML = `<strong>คำเตือน:</strong> พื้นที่ครอบคลุม ${coverageArea_sqm.toFixed(1)} m² เกินค่าสูงสุดสำหรับ ${config.name} (${config.maxArea} m²)`;
-            } else {
-                 areaWarning.style.display = 'none';
-            }
-
-
-            // --- Calculation ---
-            const density = parseFloat(densityInput.value) || 0;
-            const areaOp = parseFloat(areaOpInput.value) || 0;
-            const hoseDemand = parseFloat(hoseDemandInput.value) || 0;
-            const kFactor = parseFloat(kFactorInput.value) || 0;
-            const overageFactor = parseFloat(overageFactorInput.value) || 1;
-            const coverageArea_sqft = coverageArea_sqm * M_TO_FT * M_TO_FT;
-            
-            coverageAreaDisplay.value = `${coverageArea_sqft.toFixed(2)} sq.ft (${coverageArea_sqm.toFixed(2)} sq.m)`;
-            
-            const sprinklerDemand = density * areaOp * overageFactor; // Added Overage Factor here
-            sprinklerDemandGpmEl.textContent = `${sprinklerDemand.toFixed(2)} gpm`;
-            sprinklerDemandLpmEl.textContent = `(${(sprinklerDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
-
-            const totalDemand = sprinklerDemand + hoseDemand;
-            totalDemandGpmEl.textContent = `${totalDemand.toFixed(2)} gpm`;
-            totalDemandLpmEl.textContent = `(${(totalDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
-
-            let numSprinklers = 0;
-            if (coverageArea_sqft > 0) {
-                numSprinklers = areaOp / coverageArea_sqft;
-            }
-            numSprinklersEl.textContent = `${numSprinklers.toFixed(1)} Heads`;
-            numSprinklersRoundedEl.textContent = `(~${Math.ceil(numSprinklers)} Heads)`;
-            
-            const endHeadFlow = density * coverageArea_sqft;
-            endHeadFlowGpmEl.textContent = `${endHeadFlow.toFixed(2)} gpm`;
-            endHeadFlowLpmEl.textContent = `(${(endHeadFlow * GPM_TO_LPM).toFixed(0)} L/min)`;
-            
-            let endHeadPressure = 0;
-            if (kFactor > 0) {
-                endHeadPressure = Math.pow(endHeadFlow / kFactor, 2);
-            }
-            endHeadPressurePsiEl.textContent = `${endHeadPressure.toFixed(2)} psi`;
-            endHeadPressureBarEl.textContent = `(${(endHeadPressure * PSI_TO_BAR).toFixed(2)} bar)`;
-
-            pressureWarningEl.style.display = (endHeadPressure < 7 && endHeadPressure > 0) ? 'block' : 'none';
-            pressureOkEl.style.display = (endHeadPressure >= 7) ? 'block' : 'none';
-        }
+        const assistResultBox = document.getElementById('assist_result_box');
         
-        const calculate = validateAndCalculate;
+        const allInputs = document.querySelectorAll('input, select');
+
+        // --- CALCULATION LOGIC ---
+        function calculate() {
+            const density = parseFloat(densityInput.value) || 0;
+            const spacingS = parseFloat(spacingSInput.value) || 0;
+            const spacingL = parseFloat(spacingLInput.value) || 0;
+            const kFactor = parseFloat(kFactorInput.value) || 0;
+            const targetPressure = parseFloat(targetPressureInput.value) || 0;
+
+            // --- Design Assist Mode ---
+            if (targetPressure > 0) {
+                if (kFactor > 0 && density > 0) {
+                    const requiredFlow = kFactor * Math.sqrt(targetPressure);
+                    const requiredAreaFt2 = requiredFlow / density;
+                    const requiredAreaM2 = requiredAreaFt2 / SQM_TO_SQFT;
+                    
+                    assistResultBox.style.display = 'block';
+                    assistResultBox.innerHTML = `เพื่อให้ได้แรงดัน ${targetPressure.toFixed(1)} psi, คุณต้องมีพื้นที่ครอบคลุมต่อหัว (As) อย่างน้อย <strong>${requiredAreaM2.toFixed(2)} ตร.ม.</strong> (เช่น 3.0m x ${(requiredAreaM2/3).toFixed(2)}m)`;
+                } else {
+                    assistResultBox.style.display = 'none';
+                }
+            } else {
+                assistResultBox.style.display = 'none';
+            }
+
+            // --- Standard Calculation Mode ---
+            const coverageAreaM2 = spacingS * spacingL;
+            const coverageAreaFt2 = coverageAreaM2 * SQM_TO_SQFT;
+            coverageAreaEl.innerHTML = `<strong>${coverageAreaFt2.toFixed(2)} sq.ft</strong> <span class="metric">(${coverageAreaM2.toFixed(2)} sq.m)</span>`;
+            
+            let flow = 0;
+            let pressure = 0;
+
+            if (coverageAreaFt2 > 0 && density > 0) {
+                flow = density * coverageAreaFt2;
+            }
+            
+            if (flow > 0 && kFactor > 0) {
+                pressure = Math.pow(flow / kFactor, 2);
+            }
+
+            endHeadFlowGpmEl.textContent = `${flow.toFixed(2)} gpm`;
+            endHeadFlowLpmEl.textContent = `(${(flow * GPM_TO_LPM).toFixed(0)} L/min)`;
+            
+            endHeadPressurePsiEl.textContent = `${pressure.toFixed(2)} psi`;
+            endHeadPressureBarEl.textContent = `(${(pressure * PSI_TO_BAR).toFixed(2)} bar)`;
+
+            // --- UI Feedback ---
+            if (pressure > 0 && pressure < 7) {
+                endHeadPressurePsiEl.classList.add('pressure-warning');
+            } else {
+                endHeadPressurePsiEl.classList.remove('pressure-warning');
+            }
+        }
 
         // --- EVENT LISTENERS ---
-        hazardSelect.addEventListener('change', updateUIForHazard);
         allInputs.forEach(input => {
             input.addEventListener('input', calculate);
         });
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', updateUIForHazard);
-
+        document.addEventListener('DOMContentLoaded', calculate);
     </script>
 </body>
 </html>
