@@ -229,45 +229,31 @@
         .guidance-container p, .guidance-container ul { line-height: 1.7; }
         .guidance-container ul { list-style-type: '✓ '; padding-left: 20px; }
         .formula { background-color: #eef; font-family: monospace; padding: 10px; border-radius: 6px; text-align: center; margin: 10px 0; }
+        .print-dynamic-value { font-weight: bold; background-color: #FFFFCC; padding: 2px 6px; border-radius: 4px; border: 1px solid #E6D87A;}
 
         /* Print Styles */
         @media print {
             body {
-                background-color: white;
-                padding: 0;
-                margin: 0;
+                background-color: white; padding: 0; margin: 0;
+                font-size: 10pt;
             }
-            .calculator-container, .guidance-container, footer, .export-section {
+            .container, footer, .export-section, .tooltip-icon {
                 display: none;
             }
-            main {
-                display: block;
-                padding: 0;
-            }
             #print-area {
-                display: block !important;
-                box-shadow: none;
-                border: none;
+                display: block !important; box-shadow: none; border: none;
             }
             #print-header {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            #print-header h1 {
-                 color: black;
+                text-align: center; margin-bottom: 20px;
+                color: black;
             }
             .print-fieldset {
-                border: 1px solid #ccc;
-                break-inside: avoid;
+                border: 1px solid #ccc; break-inside: avoid; margin-bottom: 20px; padding: 15px;
             }
-            .print-fieldset .result-value {
-                color: #333;
-            }
-            .print-highlight {
-                background-color: #FFFFCC !important;
-                padding: 5px;
-                border-radius: 4px;
-            }
+            .print-fieldset legend { color: black; font-size: 1.2em; }
+            .print-fieldset .result-value { color: #333; }
+            #print-guidance h3 { color: #333; }
+            #print-guidance .formula { border: 1px solid #ccc; background-color: #f9f9f9; }
         }
     </style>
 </head>
@@ -423,33 +409,10 @@
             <h1>สรุปผลการคำนวณเบื้องต้นของระบบดับเพลิงด้วยน้ำ</h1>
             <p id="print-date"></p>
         </div>
-        <div id="print-inputs"></div>
-        <div id="print-results"></div>
+        <div id="print-inputs-wrapper"></div>
+        <div id="print-results-wrapper"></div>
+        <div id="print-guidance-wrapper"></div>
     </div>
-
-
-    <div class="container guidance-container">
-        <div class="content">
-            <h2>การนำผลลัพธ์ไปใช้ในการออกแบบ ⚙️</h2>
-            <p>ผลลัพธ์จากการคำนวณข้างต้นเป็นข้อมูลเบื้องต้นที่สำคัญสำหรับขั้นตอนต่อไปในการออกแบบระบบดับเพลิงที่สมบูรณ์</p>
-            <h3>1. การเลือกเครื่องสูบน้ำดับเพลิง (Fire Pump Selection)</h3>
-            <ul>
-                <li><strong>อัตราการไหล (Flow Rate):</strong> ปั๊มต้องมีอัตราการไหล (Rated Capacity) ไม่น้อยกว่าค่า <strong>"ปริมาณน้ำรวมทั้งระบบ (Total Demand)"</strong> ที่คำนวณได้</li>
-                <li><strong>แรงดัน (Pressure Head):</strong> ปั๊มต้องสร้างแรงดันได้เพียงพอที่จะชดเชยความสูญเสียทั้งหมดในระบบและยังคงเหลือแรงดันที่หัวสปริงเกอร์ตัวสุดท้ายไม่ต่ำกว่าค่าที่คำนวณได้</li>
-            </ul>
-            <div class="formula">
-                <strong>P<sub>ปั๊ม</sub> = P<sub>หัวสุดท้าย</sub> + P<sub>แรงเสียดทาน</sub> + P<sub>ความสูง</sub> + P<sub>อุปกรณ์</sub></strong>
-            </div>
-             <hr style="border:0; border-top: 1px solid #eee; margin: 20px 0;">
-            <h3>2. ข้อควรพิจารณาเพิ่มเติมตามมาตรฐาน NFPA และ วสท.</h3>
-            <ul>
-                <li><strong>ระยะเวลาจ่ายน้ำ (Water Supply Duration):</strong> แหล่งน้ำสำรอง (เช่น ถังเก็บน้ำ) ต้องมีขนาดใหญ่พอที่จะจ่ายน้ำในอัตรา "Total Demand" ได้ต่อเนื่องตามระยะเวลาที่กำหนด ซึ่งขึ้นอยู่กับประเภทพื้นที่อันตราย เช่น Light Hazard (30 นาที), Ordinary Hazard (60-90 นาที)</li>
-                <li><strong>ระยะห่างจากผนัง:</strong> หัวสปริงเกอร์ตัวที่ใกล้ผนังที่สุดต้องมีระยะห่างไม่เกินครึ่งหนึ่งของระยะห่างสูงสุดที่อนุญาต (Max Spacing / 2)</li>
-                <li><strong>สิ่งกีดขวาง (Obstructions):</strong> การออกแบบต้องคำนึงถึงสิ่งกีดขวาง เช่น คาน ท่อลม หรือโคมไฟ ซึ่งอาจบดบังการฉีดน้ำของหัวสปริงเกอร์</li>
-            </ul>
-        </div>
-    </div>
-
 
     <script>
         // --- CONFIGURATION ---
@@ -482,15 +445,10 @@
         };
         const allResultsMap = {
             sprinkler_demand_gpm: document.getElementById('sprinkler_demand_gpm'),
-            sprinkler_demand_lpm: document.getElementById('sprinkler_demand_lpm'),
             total_demand_gpm: document.getElementById('total_demand_gpm'),
-            total_demand_lpm: document.getElementById('total_demand_lpm'),
             num_sprinklers: document.getElementById('num_sprinklers'),
-            num_sprinklers_rounded: document.getElementById('num_sprinklers_rounded'),
             end_head_flow_gpm: document.getElementById('end_head_flow_gpm'),
-            end_head_flow_lpm: document.getElementById('end_head_flow_lpm'),
             end_head_pressure_psi: document.getElementById('end_head_pressure_psi'),
-            end_head_pressure_bar: document.getElementById('end_head_pressure_bar'),
         };
         const spacingSGuidance = document.getElementById('spacing_s_guidance');
         const spacingLGuidance = document.getElementById('spacing_l_guidance');
@@ -565,30 +523,30 @@
             allInputsMap.coverage_area_display.value = `${coverageArea_sqft.toFixed(2)} sq.ft (${coverageArea_sqm.toFixed(2)} sq.m)`;
             
             const sprinklerDemand = density * areaOp * overageFactor;
-            allResultsMap.sprinkler_demand_gpm.textContent = `${sprinklerDemand.toFixed(2)} gpm`;
-            allResultsMap.sprinkler_demand_lpm.textContent = `(${(sprinklerDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
+            document.getElementById('sprinkler_demand_gpm').textContent = `${sprinklerDemand.toFixed(2)} gpm`;
+            document.getElementById('sprinkler_demand_lpm').textContent = `(${(sprinklerDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
 
             const totalDemand = sprinklerDemand + hoseDemand;
-            allResultsMap.total_demand_gpm.textContent = `${totalDemand.toFixed(2)} gpm`;
-            allResultsMap.total_demand_lpm.textContent = `(${(totalDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
+            document.getElementById('total_demand_gpm').textContent = `${totalDemand.toFixed(2)} gpm`;
+            document.getElementById('total_demand_lpm').textContent = `(${(totalDemand * GPM_TO_LPM).toFixed(0)} L/min)`;
 
             let numSprinklers = 0;
             if (coverageArea_sqft > 0) {
                 numSprinklers = areaOp / coverageArea_sqft;
             }
-            allResultsMap.num_sprinklers.textContent = `${numSprinklers.toFixed(1)} Heads`;
-            allResultsMap.num_sprinklers_rounded.textContent = `(~${Math.ceil(numSprinklers)} Heads)`;
+            document.getElementById('num_sprinklers').textContent = `${numSprinklers.toFixed(1)} Heads`;
+            document.getElementById('num_sprinklers_rounded').textContent = `(~${Math.ceil(numSprinklers)} Heads)`;
             
             const endHeadFlow = density * coverageArea_sqft;
-            allResultsMap.end_head_flow_gpm.textContent = `${endHeadFlow.toFixed(2)} gpm`;
-            allResultsMap.end_head_flow_lpm.textContent = `(${(endHeadFlow * GPM_TO_LPM).toFixed(0)} L/min)`;
+            document.getElementById('end_head_flow_gpm').textContent = `${endHeadFlow.toFixed(2)} gpm`;
+            document.getElementById('end_head_flow_lpm').textContent = `(${(endHeadFlow * GPM_TO_LPM).toFixed(0)} L/min)`;
             
             let endHeadPressure = 0;
             if (kFactor > 0) {
                 endHeadPressure = Math.pow(endHeadFlow / kFactor, 2);
             }
-            allResultsMap.end_head_pressure_psi.textContent = `${endHeadPressure.toFixed(2)} psi`;
-            allResultsMap.end_head_pressure_bar.textContent = `(${(endHeadPressure * PSI_TO_BAR).toFixed(2)} bar)`;
+            document.getElementById('end_head_pressure_psi').textContent = `${endHeadPressure.toFixed(2)} psi`;
+            document.getElementById('end_head_pressure_bar').textContent = `(${(endHeadPressure * PSI_TO_BAR).toFixed(2)} bar)`;
 
             pressureWarningEl.style.display = 'none';
             pressureOkEl.style.display = 'none';
@@ -623,34 +581,32 @@
             }
         }
         
-        // --- EXPORT FUNCTIONS ---
         function exportToPdf() {
-            const printInputs = document.getElementById('print-inputs');
-            const printResults = document.getElementById('print-results');
-            const printDate = document.getElementById('print-date');
-
-            // Set print date
-            const now = new Date();
-            printDate.textContent = `วันที่จัดทำ: ${now.toLocaleDateString('th-TH', { day: '2-digit', month: 'long', year: 'numeric' })}`;
-
-            // Clone and populate inputs
-            const inputsFieldset = document.querySelector('#inputs fieldset').cloneNode(true);
-            printInputs.innerHTML = ''; // Clear previous
-            printInputs.appendChild(inputsFieldset);
+            // --- Populate Print Area ---
+            document.getElementById('print-date').textContent = `วันที่จัดทำ: ${new Date().toLocaleDateString('th-TH', { day: '2-digit', month: 'long', year: 'numeric' })}`;
             
-            // Clone and populate results
-            const resultsFieldset = document.querySelector('#results fieldset').cloneNode(true);
-            resultsFieldset.querySelector('.export-section').remove(); // Remove export buttons from print
+            const inputsClone = document.querySelector('#inputs fieldset').cloneNode(true);
+            document.getElementById('print-inputs-wrapper').innerHTML = '';
+            document.getElementById('print-inputs-wrapper').appendChild(inputsClone).classList.add('print-fieldset');
+
+            const resultsClone = document.querySelector('#results fieldset').cloneNode(true);
+            resultsClone.querySelector('.export-section').remove();
+            resultsClone.querySelector('#total_demand_result').classList.add('print-dynamic-value');
+            resultsClone.querySelector('#end_head_pressure_result').classList.add('print-dynamic-value');
+            document.getElementById('print-results-wrapper').innerHTML = '';
+            document.getElementById('print-results-wrapper').appendChild(resultsClone).classList.add('print-fieldset');
             
-            // Add highlight class for printing
-            const totalDemandEl = resultsFieldset.querySelector('#total_demand_result');
-            const pressureEl = resultsFieldset.querySelector('#end_head_pressure_result');
-            if(totalDemandEl) totalDemandEl.classList.add('print-highlight');
-            if(pressureEl) pressureEl.classList.add('print-highlight');
+            const guidanceClone = document.querySelector('.guidance-container .content').cloneNode(true);
+            const totalDemandValue = allResultsMap.total_demand_gpm.textContent;
+            const endHeadPressureValue = allResultsMap.end_head_pressure_psi.textContent;
 
-            printResults.innerHTML = ''; // Clear previous
-            printResults.appendChild(resultsFieldset);
-
+            const guidanceList = guidanceClone.querySelectorAll('ul li');
+            guidanceList[0].innerHTML = `<strong>อัตราการไหล (Flow Rate):</strong> ปั๊มต้องมีอัตราการไหล (Rated Capacity) ไม่น้อยกว่าค่า "ปริมาณน้ำรวมทั้งระบบ (Total Demand)" ซึ่งคำนวณได้ <span class="print-dynamic-value">${totalDemandValue}</span>`;
+            guidanceList[1].innerHTML = `<strong>แรงดัน (Pressure Head):</strong> ปั๊มต้องสร้างแรงดันได้เพียงพอ... และยังคงเหลือแรงดันที่หัวสปริงเกอร์ตัวสุดท้ายไม่ต่ำกว่าค่าที่คำนวณได้คือ <span class="print-dynamic-value">${endHeadPressureValue}</span>`;
+            
+            document.getElementById('print-guidance-wrapper').innerHTML = '';
+            document.getElementById('print-guidance-wrapper').appendChild(guidanceClone);
+            
             window.print();
         }
 
@@ -659,16 +615,16 @@
             const data = [
                 ["หัวข้อ", "ค่าที่ใช้", "หน่วย", "คำแนะนำการใช้งานต่อ"],
                 ["ประเภทพื้นที่", allInputsMap.hazard_type.options[allInputsMap.hazard_type.selectedIndex].text, "", ""],
-                ["ความหนาแน่น (Density)", allInputsMap.density.value, "gpm/sq.ft", ""],
-                ["พื้นที่ปฏิบัติงาน (Ao)", allInputsMap.area_of_operation.value, "sq.ft", ""],
+                ["ความหนาแน่น (Density)", allInputsMap.density.value, "gpm/sq.ft", "ค่าบังคับตามประเภทพื้นที่"],
+                ["พื้นที่ปฏิบัติงาน (Ao)", allInputsMap.area_of_operation.value, "sq.ft", "ค่าบังคับตามประเภทพื้นที่"],
                 ["ระยะห่าง S", allInputsMap.spacing_s.value, "m", ""],
                 ["ระยะห่าง L", allInputsMap.spacing_l.value, "m", ""],
                 ["K-Factor", allInputsMap.k_factor.value, "(Imperial)", ""],
-                ["Hose Demand", allInputsMap.hose_demand.value, "gpm", ""],
-                ["Overage Factor", allInputsMap.overage_factor.value, "", ""],
+                ["Hose Demand", allInputsMap.hose_demand.value, "gpm", "ปริมาณน้ำสำรองสำหรับสายฉีด"],
+                ["Overage Factor", allInputsMap.overage_factor.value, "", "ตัวคูณเผื่อความปลอดภัย (Safety Factor)"],
                 ["--- ผลการคำนวณ ---", "", "", ""],
-                ["ปริมาณน้ำรวมทั้งระบบ (Total Demand)", allResultsMap.total_demand_gpm.textContent, "", "ใช้สำหรับเลือกขนาด Flow Rate ของปั๊ม"],
-                ["แรงดันเริ่มต้นที่หัวสุดท้าย (End-Head Pressure)", allResultsMap.end_head_pressure_psi.textContent, "", "ใช้เป็นแรงดันเริ่มต้นในการคำนวณหา Head ของปั๊ม"]
+                ["ปริมาณน้ำรวมทั้งระบบ (Total Demand)", allResultsMap.total_demand_gpm.textContent, "", "สำคัญ: ใช้สำหรับเลือกขนาด Flow Rate ของปั๊ม (Rated Capacity)"],
+                ["แรงดันเริ่มต้นที่หัวสุดท้าย (End-Head Pressure)", allResultsMap.end_head_pressure_psi.textContent, "", "สำคัญ: ใช้เป็นแรงดันเริ่มต้น (P_หัวสุดท้าย) ในการคำนวณหา Head ของปั๊ม"]
             ];
 
             data.forEach(rowArray => {
