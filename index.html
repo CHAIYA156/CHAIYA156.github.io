@@ -272,8 +272,7 @@
         const FT_TO_M = 1 / M_TO_FT;
         const GPM_TO_LPM = 4.546;
         const PSI_TO_BAR = 0.0689476;
-        const MIN_SPACING_M = 1.8;
-        const MAX_SPACING_S_M = 3.0;
+        const MIN_SPACING_M = 1.8; // 6 ft
         const MIN_PRESSURE_PSI = 7.0;
 
         const HAZARD_CONFIG = {
@@ -315,16 +314,15 @@
 
         // --- FUNCTIONS ---
         
-        // NEW: Sets the rules based on hazard, but does NOT change user input values.
         function updateHazardRules() {
             const hazardKey = hazardSelect.value;
             const config = HAZARD_CONFIG[hazardKey];
-            spacingSGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${MAX_SPACING_S_M} m)`;
-            spacingLGuidance.textContent = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
+            const maxSpacingText = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
+            spacingSGuidance.textContent = maxSpacingText;
+            spacingLGuidance.textContent = maxSpacingText;
             calculate();
         }
         
-        // NEW: Sets the initial default values for the form ONCE on page load.
         function initializeForm() {
             const initialHazardKey = 'light';
             const config = HAZARD_CONFIG[initialHazardKey];
@@ -337,7 +335,7 @@
             kFactorInput.value = 5.6;
             overageFactorInput.value = 1.0;
             
-            updateHazardRules(); // Update rules and run first calculation
+            updateHazardRules();
         }
 
         function calculate() {
@@ -349,10 +347,13 @@
             const coverageArea_sqm = spacingS_m * spacingL_m;
 
             // Validate S, L, and Area
-            spacingSInput.classList.toggle('error-border', spacingS_m > MAX_SPACING_S_M || spacingS_m < MIN_SPACING_M);
-            spacingSGuidance.classList.toggle('error', spacingS_m > MAX_SPACING_S_M || spacingS_m < MIN_SPACING_M);
-            spacingLInput.classList.toggle('error-border', spacingL_m > config.maxSpacing || spacingL_m < MIN_SPACING_M);
-            spacingLGuidance.classList.toggle('error', spacingL_m > config.maxSpacing || spacingL_m < MIN_SPACING_M);
+            const isSInvalid = spacingS_m > config.maxSpacing || spacingS_m < MIN_SPACING_M;
+            const isLInvalid = spacingL_m > config.maxSpacing || spacingL_m < MIN_SPACING_M;
+            spacingSInput.classList.toggle('error-border', isSInvalid);
+            spacingSGuidance.classList.toggle('error', isSInvalid);
+            spacingLInput.classList.toggle('error-border', isLInvalid);
+            spacingLGuidance.classList.toggle('error', isLInvalid);
+
             if (coverageArea_sqm > config.maxArea) {
                 areaWarning.style.display = 'block';
                 areaWarning.innerHTML = `<strong>คำเตือน:</strong> พื้นที่ ${coverageArea_sqm.toFixed(1)} m² เกินค่าสูงสุดสำหรับ ${config.name} (${config.maxArea} m²)`;
@@ -405,7 +406,6 @@
                 pressureWarningEl.style.display = 'block';
                 suggestionBox.style.display = 'block';
                 
-                // Calculate required Area (As) for 7 psi
                 if (density > 0) {
                     const As_required_sqft = (kFactor * Math.sqrt(MIN_PRESSURE_PSI)) / density;
                     const S_ft = spacingS_m * M_TO_FT;
