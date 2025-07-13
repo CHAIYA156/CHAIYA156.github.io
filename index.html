@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เครื่องคำนวณระบบสปริงเกอร์ดับเพลิง</title>
+    <title>เครื่องคำนวณระบบสปริงเกอร์ดับเพลิง (ปรับปรุง)</title>
     <style>
         :root {
             --primary-color: #005A9E;
@@ -35,7 +35,7 @@
 
         .calculator-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             background-color: var(--card-background);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
@@ -67,7 +67,7 @@
             gap: 30px;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 800px) {
             main {
                 grid-template-columns: 1fr 1fr;
             }
@@ -78,6 +78,8 @@
             border-radius: var(--border-radius);
             padding: 20px;
             margin: 0;
+            height: 100%;
+            box-sizing: border-box;
         }
 
         legend {
@@ -86,11 +88,19 @@
             color: var(--primary-color);
             padding: 0 10px;
         }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
 
         .form-group {
             margin-bottom: 20px;
         }
-
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
         .form-group:last-child {
             margin-bottom: 0;
         }
@@ -117,6 +127,11 @@
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.2);
         }
+        
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
 
         .result-group {
             background-color: #f9f9f9;
@@ -138,6 +153,7 @@
             display: flex;
             justify-content: space-between;
             align-items: baseline;
+            flex-wrap: wrap;
         }
 
         .result-value .metric {
@@ -177,7 +193,6 @@
             font-size: 0.85em;
             text-align: center;
         }
-
     </style>
 </head>
 <body>
@@ -192,25 +207,44 @@
             <section id="inputs">
                 <fieldset>
                     <legend>ข้อมูลสำหรับคำนวณ</legend>
-                    <div class="form-group">
-                        <label for="density">ความหนาแน่นของการฉีดน้ำ (Density, Ds)</label>
+                    <div class="form-group full-width">
+                        <label for="density">ความหนาแน่นของการฉีดน้ำ (Density, Ds) [gpm/sq.ft]</label>
                         <input type="number" id="density" value="0.20" step="0.01">
                     </div>
-                    <div class="form-group">
-                        <label for="area_of_operation">พื้นที่ปฏิบัติงานของหัวฉีด (Area of Operation, Ao)</label>
+                    <div class="form-group full-width">
+                        <label for="area_of_operation">พื้นที่ปฏิบัติงานของหัวฉีด (Area of Operation, Ao) [sq.ft]</label>
                         <input type="number" id="area_of_operation" value="1500" step="10">
                     </div>
-                    <div class="form-group">
-                        <label for="coverage_area">พื้นที่ครอบคลุมต่อหัว (Coverage Area, As)</label>
-                        <input type="number" id="coverage_area" value="129.2" step="0.1">
+                    
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label for="spacing_s">ระยะห่างระหว่างหัว (S) [ft]</label>
+                            <input type="number" id="spacing_s" value="9.8" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="spacing_l">ระยะห่างระหว่างกิ่ง (L) [ft]</label>
+                            <input type="number" id="spacing_l" value="13.1" step="0.1">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="hose_demand">ความต้องการน้ำสำหรับสายฉีด (Hose Demand)</label>
+
+                    <div class="form-group full-width">
+                        <label for="coverage_area">พื้นที่ครอบคลุมต่อหัว (As = S x L) [sq.ft]</label>
+                        <input type="number" id="coverage_area" readonly>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="hose_demand">ความต้องการน้ำสำหรับสายฉีด (Hose Demand) [gpm]</label>
                         <input type="number" id="hose_demand" value="250" step="50">
                     </div>
-                    <div class="form-group">
-                        <label for="k_factor">ค่า K-factor ของหัวสปริงเกอร์</label>
-                        <input type="number" id="k_factor" value="5.6" step="0.1">
+                     <div class="input-grid">
+                        <div class="form-group">
+                            <label for="k_factor">K-factor (Imperial)</label>
+                            <input type="number" id="k_factor" value="5.6" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="overage_factor">Overage Factor</label>
+                            <input type="number" id="overage_factor" value="1" step="0.1">
+                        </div>
                     </div>
                 </fieldset>
             </section>
@@ -222,14 +256,14 @@
                         <div class="label">ปริมาณน้ำที่ระบบต้องการ (Sprinkler System Demand)</div>
                         <div class="result-value">
                             <span id="sprinkler_demand_gpm">300.00 gpm</span>
-                            <span class="metric" id="sprinkler_demand_lpm">1,363 L/min</span>
+                            <span class="metric" id="sprinkler_demand_lpm">1,364 L/min</span>
                         </div>
                     </div>
                     <div class="form-group result-group">
                         <div class="label">ปริมาณน้ำรวมทั้งระบบ (Total Demand)</div>
                         <div class="result-value">
                             <span id="total_demand_gpm">550.00 gpm</span>
-                            <span class="metric" id="total_demand_lpm">2,309 L/min</span>
+                            <span class="metric" id="total_demand_lpm">2,499 L/min</span>
                         </div>
                     </div>
                      <div class="form-group result-group">
@@ -243,7 +277,7 @@
                         <div class="label">อัตราการไหลที่หัวสุดท้าย (End-Head Flow)</div>
                         <div class="result-value">
                             <span id="end_head_flow_gpm">25.84 gpm</span>
-                            <span class="metric" id="end_head_flow_lpm">97.8 L/min</span>
+                            <span class="metric" id="end_head_flow_lpm">117 L/min</span>
                         </div>
                     </div>
                     <div class="form-group result-group">
@@ -270,17 +304,18 @@
     <script>
         // Conversion Factors
         const GPM_TO_LPM = 4.546;
-        const SQFT_TO_SQM = 0.092903;
         const PSI_TO_BAR = 0.0689476;
-        const GPM_SQFT_TO_MM_MIN = 4.0746;
 
         // DOM Elements
         const inputs = document.querySelectorAll('#inputs input');
         const densityInput = document.getElementById('density');
         const areaOpInput = document.getElementById('area_of_operation');
+        const spacingSInput = document.getElementById('spacing_s');
+        const spacingLInput = document.getElementById('spacing_l');
         const coverageAreaInput = document.getElementById('coverage_area');
         const hoseDemandInput = document.getElementById('hose_demand');
         const kFactorInput = document.getElementById('k_factor');
+        const overageFactorInput = document.getElementById('overage_factor');
 
         const sprinklerDemandGpmEl = document.getElementById('sprinkler_demand_gpm');
         const sprinklerDemandLpmEl = document.getElementById('sprinkler_demand_lpm');
@@ -299,12 +334,18 @@
             // Get values from inputs
             const density = parseFloat(densityInput.value) || 0;
             const areaOp = parseFloat(areaOpInput.value) || 0;
-            const coverageArea = parseFloat(coverageAreaInput.value) || 0;
+            const spacingS = parseFloat(spacingSInput.value) || 0;
+            const spacingL = parseFloat(spacingLInput.value) || 0;
             const hoseDemand = parseFloat(hoseDemandInput.value) || 0;
             const kFactor = parseFloat(kFactorInput.value) || 0;
+            const overageFactor = parseFloat(overageFactorInput.value) || 0;
 
+            // 0. Calculate Coverage Area (As)
+            const coverageArea = spacingS * spacingL;
+            coverageAreaInput.value = coverageArea.toFixed(2);
+            
             // 1. Sprinkler System Demand
-            const sprinklerDemand = density * areaOp;
+            const sprinklerDemand = density * areaOp * overageFactor;
             sprinklerDemandGpmEl.textContent = `${sprinklerDemand.toFixed(2)} gpm`;
             sprinklerDemandLpmEl.textContent = `${(sprinklerDemand * GPM_TO_LPM).toFixed(0)} L/min`;
 
@@ -324,7 +365,7 @@
             // 4. End-Head Sprinkler Flow
             const endHeadFlow = density * coverageArea;
             endHeadFlowGpmEl.textContent = `${endHeadFlow.toFixed(2)} gpm`;
-            endHeadFlowLpmEl.textContent = `${(endHeadFlow * GPM_TO_LPM).toFixed(1)} L/min`;
+            endHeadFlowLpmEl.textContent = `${(endHeadFlow * GPM_TO_LPM).toFixed(0)} L/min`;
             
             // 5. End-Head Start Pressure
             let endHeadPressure = 0;
@@ -345,7 +386,6 @@
                  pressureWarningEl.style.display = 'none';
                  pressureOkEl.style.display = 'none';
             }
-
         }
 
         // Add event listeners to all inputs
@@ -359,4 +399,3 @@
     </script>
 </body>
 </html>
-
