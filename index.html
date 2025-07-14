@@ -75,7 +75,7 @@
         @media (min-width: 800px) {
             main {
                 grid-template-columns: 1fr 1fr;
-                align-items: start; /* DEFINITIVE FIX: Prevents columns from stretching to equal height */
+                align-items: start;
             }
         }
 
@@ -165,7 +165,7 @@
             opacity: 1;
         }
 
-        .guidance-text { font-size: 0.8em; color: var(--label-color); margin-top: -5px; }
+        .guidance-text { font-size: 0.8em; color: var(--label-color); margin-top: 5px; }
         
         input[type="number"], select {
             width: 100%; padding: 10px; border: 1px solid var(--border-color);
@@ -323,7 +323,7 @@
                         <div class="form-group">
                             <label for="spacing_s">
                                 <span class="label-text">4. ระยะห่างระหว่างหัว (S) [m]<span class="label-eng">Spacing (S)</span></span>
-                                <div class="tooltip-icon">i<span class="tooltip-text">ระยะห่างของหัวสปริงเกอร์บนท่อกิ่งเดียวกัน</span></div>
+                                <div class="tooltip-icon">i<span class="tooltip-text">ระยะห่างของหัวสปริงเกอร์บนท่อกิ่งเดียวกัน (หน่วย: เมตร)</span></div>
                             </label>
                             <input type="number" id="spacing_s" value="3.0" step="0.1">
                             <p id="spacing_s_guidance" class="guidance-text"></p>
@@ -331,7 +331,7 @@
                         <div class="form-group">
                             <label for="spacing_l">
                                 <span class="label-text">5. ระยะห่างระหว่างกิ่ง (L) [m]<span class="label-eng">Spacing (L)</span></span>
-                                <div class="tooltip-icon">i<span class="tooltip-text">ระยะห่างระหว่างท่อกิ่งแต่ละเส้น</span></div>
+                                <div class="tooltip-icon">i<span class="tooltip-text">ระยะห่างระหว่างท่อกิ่งแต่ละเส้น (หน่วย: เมตร)</span></div>
                             </label>
                             <input type="number" id="spacing_l" value="4.0" step="0.1">
                              <p id="spacing_l_guidance" class="guidance-text"></p>
@@ -488,7 +488,7 @@
             // --- CONFIGURATION ---
             const M_TO_FT = 3.28084;
             const FT_TO_M = 1 / M_TO_FT;
-            const GPM_TO_LPM = 3.785; // Corrected to standard conversion
+            const GPM_TO_LPM = 3.785; 
             const PSI_TO_BAR = 0.0689476;
             const MIN_SPACING_M = 1.8; // 6 ft
             const MIN_PRESSURE_PSI = 7.0;
@@ -546,7 +546,6 @@
             }
             
             function mToFt(m) { return m * M_TO_FT; }
-            function ftToM(ft) { return ft * FT_TO_M; }
             function gpmToLpm(gpm) { return gpm * GPM_TO_LPM; }
             function psiToBar(psi) { return psi * PSI_TO_BAR; }
 
@@ -555,18 +554,18 @@
                 const hazard = els.hazardType.value;
                 const density = parseFloat(els.density.value) || 0;
                 const areaOfOp = parseFloat(els.areaOfOperation.value) || 0;
-                const spacingS_m = parseFloat(els.spacingS.value) || 0;
-                const spacingL_m = parseFloat(els.spacingL.value) || 0;
+                const spacingS_m = parseFloat(els.spacingS.value) || 0; // Read as meters
+                const spacingL_m = parseFloat(els.spacingL.value) || 0; // Read as meters
                 const hose = parseInt(els.hoseDemand.value, 10) || 0;
                 const kFactor = parseFloat(els.kFactor.value) || 0;
                 const overageFactor = parseFloat(els.overageFactor.value) || 1.0;
 
                 // 2. Intermediate Calculations
-                const coverageArea_m2 = spacingS_m * spacingL_m;
-                const coverageArea_sqft = coverageArea_m2 * (M_TO_FT * M_TO_FT);
+                const coverageArea_m2 = spacingS_m * spacingL_m; // Direct calculation in m²
+                const coverageArea_sqft = mToFt(mToFt(coverageArea_m2)); // Convert m² to sq.ft
                 
                 let numSprinklers = (areaOfOp / coverageArea_sqft) || 0;
-                if (numSprinklers < 1 && areaOfOp > 0) numSprinklers = 1; // Ensure at least one sprinkler if area is specified
+                if (numSprinklers < 1 && areaOfOp > 0) numSprinklers = 1;
                 const numSprinklersRounded = Math.ceil(numSprinklers);
 
                 const sprinklerDemandGpm = density * areaOfOp * overageFactor;
@@ -608,8 +607,8 @@
                 const config = HAZARD_CONFIG[els.hazardType.value];
                 if (!config) return;
                 
-                const maxSpacingFt = mToFt(config.maxSpacing);
-                const guidanceText = `สูงสุด ${config.maxSpacing} m (~${maxSpacingFt.toFixed(1)} ft)`;
+                // Replicate the format shown in the user's image
+                const guidanceText = `(มาตรฐาน: ${MIN_SPACING_M} - ${config.maxSpacing} m)`;
                 els.spacingSGuidance.textContent = guidanceText;
                 els.spacingLGuidance.textContent = guidanceText;
             }
@@ -619,7 +618,7 @@
                 if (!config) return;
 
                 const maxArea = config.maxArea;
-                const maxAreaFt = maxArea * M_TO_FT * M_TO_FT;
+                const maxAreaFt = mToFt(mToFt(maxArea));
                 
                 if (area_m2 > maxArea) {
                     els.areaWarning.innerHTML = `<strong>คำเตือน:</strong> พื้นที่ครอบคลุมเกินค่าสูงสุดที่กำหนดสำหรับ ${config.name} (${maxArea.toFixed(1)} m² หรือ ~${maxAreaFt.toFixed(0)} sq.ft)`;
@@ -668,7 +667,7 @@
                     ["ระยะห่างระหว่างกิ่ง (L)", els.spacingL.value, "m", "Spacing (L)", els.spacingL.value, "m"],
                     ["K-Factor", els.kFactor.value, "-", "K-Factor", els.kFactor.value, "-"],
                     ["น้ำสำรองสายฉีด", els.hoseDemand.value, "gpm", "Hose Demand", els.hoseDemand.value, "gpm"],
-                    [], // Spacer
+                    [],
                     ["ผลการคำนวณ", "Result", "", "Calculation Result", "Result", ""],
                     ["ปริมาณน้ำที่ระบบต้องการ", els.sprinklerDemandGpm.textContent.replace(' GPM', ''), "GPM", "Sprinkler System Demand", els.sprinklerDemandGpm.textContent.replace(' GPM', ''), "GPM"],
                     ["ปริมาณน้ำรวมทั้งระบบ", els.totalDemandGpm.textContent.replace(' GPM', ''), "GPM", "Total Demand", els.totalDemandGpm.textContent.replace(' GPM', ''), "GPM"],
@@ -677,7 +676,7 @@
                     ["แรงดันเริ่มต้นที่หัวสุดท้าย", els.endHeadPressurePsi.textContent.replace(' psi', ''), "psi", "End-Head Start Pressure", els.endHeadPressurePsi.textContent.replace(' psi', ''), "psi"],
                 ];
                 
-                let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Add BOM for Excel
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
                 csvContent += headers.join(",") + "\r\n";
                 data.forEach(rowArray => {
                     let row = rowArray.join(",");
@@ -694,22 +693,18 @@
             }
             
             function preparePrintContent() {
-                // Set Print Date
                 document.getElementById('print-date').textContent = `วันที่จัดทำ: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
 
-                // Clone inputs and results into the print area
                 const inputsContent = document.getElementById('inputs').querySelector('fieldset').cloneNode(true);
                 const resultsContent = document.getElementById('results').querySelector('fieldset').cloneNode(true);
                 
-                // Clean up clones for printing
-                inputsContent.querySelectorAll('.tooltip-icon, .guidance-text, .info-box').forEach(el => el.remove());
+                inputsContent.querySelectorAll('.tooltip-icon, .info-box').forEach(el => el.remove());
+                // Keep guidance text in print
                 resultsContent.querySelectorAll('.pressure-warning, .pressure-ok, .suggestion-box, .export-section').forEach(el => el.remove());
                 
-                // Set print area class for styling
                 inputsContent.className = 'print-fieldset';
                 resultsContent.className = 'print-fieldset';
 
-                // Populate print wrappers
                 const inputsWrapper = document.getElementById('print-inputs-wrapper');
                 const resultsWrapper = document.getElementById('print-results-wrapper');
                 const guidanceWrapper = document.getElementById('print-guidance-wrapper');
@@ -721,7 +716,6 @@
                 inputsWrapper.appendChild(inputsContent);
                 resultsWrapper.appendChild(resultsContent);
 
-                // Clone and add the guidance section
                 const guidanceContent = document.getElementById('guidance-section').querySelector('.content').cloneNode(true);
                 guidanceWrapper.appendChild(guidanceContent);
             }
