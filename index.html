@@ -226,10 +226,12 @@
         
         .guidance-container .content { padding: 30px; }
         .guidance-container h2 { font-size: 1.5em; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-top:0; }
-        .guidance-container h3 { font-size: 1.2em; color: var(--secondary-color); margin-top: 25px; margin-bottom: 15px;}
+        .guidance-container h3, .guidance-container h4 { font-size: 1.2em; color: var(--secondary-color); margin-top: 25px; margin-bottom: 15px;}
+        .guidance-container h4 { font-size: 1.1em; color: var(--primary-color); margin-top: 20px; }
         .guidance-container p, .guidance-container ul { line-height: 1.8; }
         .guidance-container ul { list-style-type: '✓ '; padding-left: 25px; }
         .guidance-container li { margin-bottom: 10px; }
+        .guidance-container .sub-list { list-style-type: '• '; margin-top: 8px; }
         .formula { background-color: #eef; font-family: monospace; padding: 15px; border-radius: 6px; border: 1px solid #dbe3f8; text-align: center; margin: 15px 0; font-size: 1.1em; overflow-x: auto; }
         
         /* Print Styles */
@@ -263,7 +265,7 @@
             }
             .print-fieldset legend { color: black !important; font-size: 1.3em; font-weight: bold; }
             .print-fieldset .result-value { color: #333 !important; }
-            #print-guidance-wrapper h2, #print-guidance-wrapper h3 { color: black !important; border-color: #ccc !important; }
+            #print-guidance-wrapper h2, #print-guidance-wrapper h3, #print-guidance-wrapper h4 { color: black !important; border-color: #ccc !important; }
             #print-guidance-wrapper .formula { border: 1px solid #ccc !important; background-color: #f9f9f9 !important; }
         }
     </style>
@@ -450,7 +452,7 @@
             </div>
              <ul>
                  <li><strong>ระยะเวลาจ่ายน้ำ (Duration) ตาม NFPA 13:</strong>
-                    <ul>
+                    <ul class="sub-list">
                         <li>Light Hazard: <strong>30 นาที</strong></li>
                         <li>Ordinary Hazard: <strong>60 - 90 นาที</strong></li>
                         <li>Extra Hazard: <strong>90 - 120 นาที</strong></li>
@@ -460,6 +462,13 @@
                      <strong>ตัวอย่าง:</strong> หากระบบเป็น <strong id="example-hazard-name"></strong> ต้องการน้ำ <strong id="example-lpm"></strong> LPM และต้องสำรองน้ำนาน <strong id="example-duration"></strong> นาที จะต้องมีถังเก็บน้ำขนาดอย่างน้อย <strong id="example-tank-size"></strong> ลิตร
                  </li>
              </ul>
+             
+            <h4>ข้อควรพิจารณาเพิ่มเติม</h4>
+            <ul>
+                <li><strong>การเลือกขนาดถังจริง:</strong> ค่าที่คำนวณได้คือปริมาตรน้ำขั้นต่ำที่ใช้งานได้ (Net Usable Volume) ในทางปฏิบัติควรเลือกขนาดถังมาตรฐาน (เช่น 50,000 ลิตร, 75,000 ลิตร, 100,000 ลิตร) ที่มีความจุไม่น้อยกว่าค่านี้</li>
+                <li><strong>ปริมาตรเผื่อ:</strong> การออกแบบจริงอาจต้องพิจารณาปริมาตรน้ำส่วนที่ไม่สามารถใช้งานได้ (ก้นถัง) และปริมาตรอากาศ (Freeboard) เพิ่มเติม ซึ่งทำให้ขนาดถังโดยรวม (Gross Volume) ใหญ่กว่าค่าที่คำนวณได้</li>
+                <li><strong>ข้อบังคับท้องถิ่น:</strong> ควรตรวจสอบข้อกำหนดของหน่วยงานท้องถิ่นซึ่งอาจมีข้อบังคับเกี่ยวกับขนาดถังสำรองน้ำดับเพลิงเพิ่มเติมจากมาตรฐานสากล</li>
+            </ul>
         </div>
     </div>
     
