@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>การคำนวณเบื้องต้นของระบบดับเพลิงด้วยนํ้า</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --primary-color: #005A9E;
@@ -38,7 +37,7 @@
         .container {
             width: 100%;
             max-width: 900px;
-            margin-bottom: 20px; /* Adjusted margin */
+            margin-bottom: 30px;
         }
 
         .calculator-container, .guidance-container {
@@ -46,10 +45,6 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             overflow: hidden;
-        }
-        
-        .guidance-container {
-            margin-top: 30px;
         }
 
         header {
@@ -80,7 +75,7 @@
         @media (min-width: 800px) {
             main {
                 grid-template-columns: 1fr 1fr;
-                align-items: start;
+                align-items: start; /* DEFINITIVE FIX: Prevents columns from stretching to equal height */
             }
         }
 
@@ -229,27 +224,17 @@
 
         footer { background-color: #f0f0f0; color: #777; padding: 15px 30px; font-size: 0.85em; text-align: center; }
         
-        /* --- NEW/MODIFIED STYLES for Guidance Section --- */
-        .guidance-container .content { padding: 20px 30px; }
-        .guidance-container h2 {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px; /* Space between icon and text */
-            font-size: 1.4em;
-        }
-        .guidance-container h3 { color: var(--secondary-color); margin-top: 25px; border-left: 3px solid var(--secondary-color); padding-left: 10px;}
-        .guidance-container p, .guidance-container ul { line-height: 1.8; color: #444; }
+        .guidance-container .content { padding: 30px; }
+        .guidance-container h2 { font-size: 1.5em; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-top:0; }
+        .guidance-container h3 { font-size: 1.2em; color: var(--secondary-color); margin-top: 25px; margin-bottom: 15px;}
+        .guidance-container p, .guidance-container ul { line-height: 1.8; }
         .guidance-container ul { list-style-type: '✓ '; padding-left: 25px; }
-        .guidance-container li { margin-bottom: 12px; padding-left: 5px;}
-        .guidance-container strong { color: var(--primary-color); font-weight: 700; }
-        .formula { background-color: #eef; font-family: monospace; padding: 10px; border-radius: 6px; text-align: center; margin: 10px 0; }
+        .guidance-container li { margin-bottom: 10px; }
+        .formula { background-color: #eef; font-family: monospace; padding: 15px; border-radius: 6px; border: 1px solid #dbe3f8; text-align: center; margin: 15px 0; font-size: 1.1em; overflow-x: auto; }
         
         .print-dynamic-value {
             font-weight: bold;
-            background-color: #FFFFCC;
+            background-color: #FFFFCC !important;
             padding: 2px 6px;
             border-radius: 4px;
             border: 1px solid #E6D87A;
@@ -258,28 +243,40 @@
         /* Print Styles */
         @media print {
             body {
-                background-color: white; padding: 20px; margin: 0;
+                background-color: white; padding: 0; margin: 0;
                 font-size: 10pt;
-                -webkit-print-color-adjust: exact !important;
+                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .container, footer, .export-section, .tooltip-icon, header p {
-                display: none;
+            .container, footer, .export-section, .tooltip-icon, header {
+                display: none !important;
             }
             #print-area {
-                display: block !important; box-shadow: none; border: none;
+                display: block !important; box-shadow: none !important; border: none !important;
+                width: 100%; max-width: 100%;
             }
-            #print-header { text-align: center; margin-bottom: 25px; color: black; }
-            #print-header h1 { font-size: 1.5em; margin-bottom: 5px;}
-            .print-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;}
-            .print-fieldset { border: 1px solid #ccc; break-inside: avoid; padding: 15px; }
-            .print-fieldset legend { color: black; font-size: 1.2em; font-weight: bold; }
-            .print-fieldset .result-value { color: #333; }
-            #print-guidance-wrapper { grid-column: 1 / -1; margin-top: 10px; }
-            #print-guidance-wrapper h2, #print-guidance-wrapper h3 { color: black; border-color: #999;}
-            #print-guidance-wrapper .fas { display: none; } /* Hide icon in print */
-            #print-guidance-wrapper strong { color: black; }
-            .print-dynamic-value { border: 1px solid #ccc; background-color: #f9f9f9 !important;}
+            #print-header {
+                text-align: center; margin-bottom: 25px;
+                color: black;
+            }
+            #print-header h1 { font-size: 18pt; margin-bottom: 5px;}
+            #print-header p { font-size: 11pt; margin-top: 0; }
+
+            .print-section {
+                 page-break-inside: avoid;
+                 margin-bottom: 20px;
+            }
+            .print-fieldset {
+                border: 1px solid #ccc !important; break-inside: avoid; margin-bottom: 20px; padding: 15px;
+            }
+            .print-fieldset legend { color: black !important; font-size: 1.3em; font-weight: bold; }
+            .print-fieldset .result-value { color: #333 !important; }
+            #print-guidance-wrapper h2, #print-guidance-wrapper h3 { color: black !important; border-color: #ccc !important; }
+            #print-guidance-wrapper .formula { border: 1px solid #ccc !important; background-color: #f9f9f9 !important; }
+            .print-dynamic-value {
+                border: 1px solid #ccc !important;
+                background-color: #f0f0f0 !important;
+            }
         }
     </style>
 </head>
@@ -302,7 +299,7 @@
                         </label>
                         <select id="hazard_type">
                             <option value="light">Light Hazard (ความเสี่ยงต่ำ)</option>
-                            <option value="ordinary1" selected>Ordinary Hazard Group 1 (ความเสี่ยงปานกลาง 1)</option>
+                            <option value="ordinary1">Ordinary Hazard Group 1 (ความเสี่ยงปานกลาง 1)</option>
                             <option value="ordinary2">Ordinary Hazard Group 2 (ความเสี่ยงปานกลาง 2)</option>
                             <option value="extra1">Extra Hazard Group 1 (ความเสี่ยงสูง 1)</option>
                             <option value="extra2">Extra Hazard Group 2 (ความเสี่ยงสูง 2)</option>
@@ -328,14 +325,16 @@
                                 <span class="label-text">4. ระยะห่างระหว่างหัว (S) [m]<span class="label-eng">Spacing (S)</span></span>
                                 <div class="tooltip-icon">i<span class="tooltip-text">ระยะห่างของหัวสปริงเกอร์บนท่อกิ่งเดียวกัน</span></div>
                             </label>
-                            <input type="number" id="spacing_s" value="3.7" step="0.1">
+                            <input type="number" id="spacing_s" value="3.0" step="0.1">
+                            <p id="spacing_s_guidance" class="guidance-text"></p>
                         </div>
                         <div class="form-group">
                             <label for="spacing_l">
                                 <span class="label-text">5. ระยะห่างระหว่างกิ่ง (L) [m]<span class="label-eng">Spacing (L)</span></span>
                                 <div class="tooltip-icon">i<span class="tooltip-text">ระยะห่างระหว่างท่อกิ่งแต่ละเส้น</span></div>
                             </label>
-                            <input type="number" id="spacing_l" value="3.3" step="0.1">
+                            <input type="number" id="spacing_l" value="4.0" step="0.1">
+                             <p id="spacing_l_guidance" class="guidance-text"></p>
                         </div>
                     </div>
                     <div class="form-group full-width">
@@ -352,9 +351,9 @@
                                 <div class="tooltip-icon">i<span class="tooltip-text">ปริมาณน้ำที่ต้องสำรองไว้สำหรับเจ้าหน้าที่ดับเพลิงใช้สายฉีด</span></div>
                             </label>
                             <select id="hose_demand">
-                                <option value="100">100 gpm</option>
-                                <option value="250">250 gpm</option>
-                                <option value="500">500 gpm</option>
+                                <option value="100">100 gpm (Light Hazard)</option>
+                                <option value="250">250 gpm (Ordinary Hazard)</option>
+                                <option value="500">500 gpm (Extra Hazard)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -372,7 +371,7 @@
                      <div class="form-group full-width">
                          <label for="overage_factor">
                             <span class="label-text">8. Overage Factor</span>
-                            <div class="tooltip-icon">i<span class="tooltip-text">ตัวคูณเผื่อความปลอดภัยในการคำนวณ (Safety Factor) มักใช้ค่าเป็น 1</span></div>
+                            <div class="tooltip-icon">i<span class="tooltip-text">ตัวคูณเผื่อความปลอดภัยในการคำนวณ มักใช้ค่าเป็น 1</span></div>
                         </label>
                         <input type="number" id="overage_factor" value="1.0" step="0.1">
                     </div>
@@ -383,31 +382,31 @@
                 <fieldset>
                     <legend>ผลการคำนวณ (Calculation Results)</legend>
                     <div class="form-group result-group">
-                        <div class="label">ปริมาณน้ำที่ระบบต้องการ<span class="label-eng">Sprinkler System Demand (Qₛ)</span></div>
+                        <div class="label">ปริมาณน้ำที่ระบบต้องการ<span class="label-eng">Sprinkler System Demand</span></div>
                         <div class="result-value">
                             <span id="sprinkler_demand_gpm"></span><span class="metric" id="sprinkler_demand_lpm"></span>
                         </div>
                     </div>
                     <div class="form-group result-group">
-                        <div class="label">ปริมาณน้ำรวมทั้งระบบ<span class="label-eng">Total Demand (Qₜ)</span></div>
+                        <div class="label">ปริมาณน้ำรวมทั้งระบบ<span class="label-eng">Total Demand</span></div>
                         <div class="result-value" id="total_demand_result">
                             <span id="total_demand_gpm"></span><span class="metric" id="total_demand_lpm"></span>
                         </div>
                     </div>
                      <div class="form-group result-group">
-                        <div class="label">จำนวนหัวสปริงเกอร์ที่ทำงาน<span class="label-eng">Number of Sprinklers (N)</span></div>
+                        <div class="label">จำนวนหัวสปริงเกอร์ที่ทำงาน<span class="label-eng">Number of Sprinklers</span></div>
                         <div class="result-value">
                             <span id="num_sprinklers"></span><span class="metric" id="num_sprinklers_rounded"></span>
                         </div>
                     </div>
                     <div class="form-group result-group">
-                        <div class="label">อัตราการไหลที่หัวสุดท้าย<span class="label-eng">End-Head Flow (q)</span></div>
+                        <div class="label">อัตราการไหลที่หัวสุดท้าย<span class="label-eng">End-Head Flow</span></div>
                         <div class="result-value">
                             <span id="end_head_flow_gpm"></span><span class="metric" id="end_head_flow_lpm"></span>
                         </div>
                     </div>
                     <div class="form-group result-group">
-                        <div class="label">แรงดันเริ่มต้นที่หัวสุดท้าย<span class="label-eng">End-Head Start Pressure (P)</span></div>
+                        <div class="label">แรงดันเริ่มต้นที่หัวสุดท้าย<span class="label-eng">End-Head Start Pressure</span></div>
                         <div class="result-value" id="end_head_pressure_result">
                             <span id="end_head_pressure_psi"></span><span class="metric" id="end_head_pressure_bar"></span>
                         </div>
@@ -421,314 +420,329 @@
                     </div>
                     <div class="export-section">
                         <button id="exportPdfBtn">📄 ส่งออกเป็น PDF</button>
+                        <button id="exportExcelBtn" class="excel">📊 ส่งออกเป็น Excel (.csv)</button>
                     </div>
                 </fieldset>
             </section>
         </main>
     </div>
-    
-    <div class="container guidance-container">
+
+    <div class="container guidance-container" id="guidance-section">
         <div class="content">
-            <h2><i class="fa-solid fa-circle-info"></i> ข้อมูลเพิ่มเติมและขั้นตอนถัดไป</h2>
+            <h2>ข้อมูลอ้างอิงและการนำไปใช้งาน (Reference & Application)</h2>
             
-            <h3>การนำผลการคำนวณไปใช้งานต่อ</h3>
-            <p>ผลลัพธ์จากการคำนวณเบื้องต้นนี้ เป็นข้อมูลสำคัญสำหรับขั้นตอนการออกแบบทางวิศวกรรมขั้นต่อไป โดยเฉพาะการเลือกส่วนประกอบหลักของระบบ:</p>
+            <h3>ที่มาของค่าต่างๆ ตามมาตรฐาน</h3>
+            <p>การคำนวณนี้อ้างอิงหลักการจากมาตรฐานสากล เพื่อให้ได้ผลลัพธ์ที่เป็นพื้นฐานสำหรับการออกแบบในขั้นต่อไป:</p>
             <ul>
-                <li><strong>การเลือกเครื่องสูบน้ำดับเพลิง (Fire Pump):</strong>
-                    ค่า <strong>"ปริมาณน้ำรวมทั้งระบบ (Total Demand)"</strong> ที่คำนวณได้ (<span class="print-dynamic-value" id="guidance-total-demand"></span> GPM) คืออัตราการไหลที่เครื่องสูบน้ำดับเพลิงจะต้องสามารถจ่ายได้เป็นอย่างน้อย ดังนั้น จึงใช้ค่านี้เป็นเกณฑ์หลักในการเลือกรุ่นของ Fire Pump
-                </li>
-                <li><strong>การกำหนดแรงดันของเครื่องสูบน้ำดับเพลิง:</strong>
-                    ค่า <strong>"แรงดันเริ่มต้นที่หัวสุดท้าย (End-Head Pressure)"</strong> (<span class="print-dynamic-value" id="guidance-end-pressure"></span> PSI) คือแรงดันขั้นต่ำที่ต้องการ ณ หัวสปริงเกอร์ที่อยู่ไกลที่สุดในทางชลศาสตร์ การเลือก Fire Pump จะต้องพิจารณาแรงดันนี้ แล้วบวกเพิ่มด้วยค่าแรงดันที่สูญเสียในเส้นท่อ (Friction Loss) และแรงดันจากความสูงของอาคาร (Elevation Head) เพื่อให้ได้แรงดันรวม (Total Head) ที่ Fire Pump ต้องทำได้
-                </li>
-                <li><strong>การเลือกเครื่องสูบน้ำรักษาแรงดัน (Jockey Pump):</strong>
-                    Jockey Pump ไม่ได้ถูกเลือกจากอัตราการไหลนี้ แต่จะถูกเลือกให้มีขนาดเล็กพอที่จะเติมน้ำชดเชยการรั่วซึมเล็กน้อยในระบบ เพื่อรักษาระดับแรงดันให้คงที่ โดยไม่ต้องให้ Fire Pump ขนาดใหญ่ทำงานโดยไม่จำเป็น โดยทั่วไปจะตั้งค่าแรงดันของ Jockey Pump ให้สูงกว่าแรงดันเริ่มทำงาน (Cut-in) ของ Fire Pump เล็กน้อย
-                </li>
+                <li><strong>ความหนาแน่น (Density) และพื้นที่ปฏิบัติงาน (Area of Operation):</strong> ค่าพื้นฐานเหล่านี้มาจากกราฟ <strong>Density/Area Curves ในมาตรฐาน NFPA 13</strong> ซึ่งเป็นหัวใจของการออกแบบระบบสปริงเกอร์ โดยจะแปรผันตามประเภทความเสี่ยงของพื้นที่ (Hazard Classification)</li>
+                <li><strong>น้ำสำรองสายฉีด (Hose Demand):</strong> ปริมาณน้ำสำหรับสายฉีดดับเพลิง (100, 250, หรือ 500 GPM) ถูกกำหนดไว้ในตารางของ <strong>NFPA 13</strong> ซึ่งเป็นข้อบังคับที่ต้องนำมาบวกเพิ่มเข้าไปในความต้องการน้ำของระบบสปริงเกอร์</li>
+                 <li><strong>แรงดันเริ่มต้นขั้นต่ำ (Minimum Start Pressure):</strong> มาตรฐาน <strong>NFPA 13</strong> กำหนดว่าแรงดันที่หัวสปริงเกอร์ (ไม่ว่าจะเป็นหัวฉีดมาตรฐานหรือหัวเฉพาะทาง) จะต้องไม่น้อยกว่า <strong>7 psi (0.5 bar)</strong> เพื่อให้รูปแบบการกระจายน้ำเป็นไปตามที่ออกแบบไว้</li>
+                <li><strong>ผลรวมความต้องการน้ำ (Total Demand):</strong> คือผลรวมของน้ำสำหรับระบบสปริงเกอร์ (Sprinkler Demand) และน้ำสำหรับสายฉีด (Hose Demand) ค่านี้คือจุดเริ่มต้นสำคัญที่จะนำไปใช้เลือกขนาดปั๊มน้ำดับเพลิงตามมาตรฐาน <strong>NFPA 20</strong></li>
+                 <li><strong>มาตรฐาน FM Global:</strong> สำหรับโครงการบางประเภท โดยเฉพาะคลังสินค้าที่มีความเสี่ยงสูง อาจต้องพิจารณาข้อกำหนดจาก <strong>FM Global Data Sheets (เช่น FM 2-0)</strong> ประกอบด้วย ซึ่งอาจมีข้อกำหนดด้าน Density/Area ที่เข้มงวดกว่า NFPA</li>
             </ul>
 
-            <h3>ข้อควรพิจารณาเพิ่มเติม</h3>
-            <p>การคำนวณนี้ใช้วิธี Area/Density ซึ่งเป็นการประเมินเบื้องต้นที่สะดวกและรวดเร็ว อย่างไรก็ตาม ในการออกแบบจริงจะต้องมีการ<strong>คำนวณทางชลศาสตร์ (Hydraulic Calculation)</strong> อย่างละเอียดทั้งระบบโดยใช้โปรแกรมคอมพิวเตอร์ตามสมการ Hazen-Williams เพื่อหาค่าความดันสูญเสียในท่อแต่ละเส้นอย่างแม่นยำ และยืนยันว่าทุกหัวสปริงเกอร์ในพื้นที่ปฏิบัติงานจะได้รับน้ำและแรงดันเพียงพอตามมาตรฐาน</p>
+            <h3>การนำผลลัพธ์ไปใช้งานต่อ</h3>
+            <p>ผลการคำนวณเบื้องต้นนี้เป็นข้อมูลสำคัญสำหรับวิศวกรในการตัดสินใจออกแบบองค์ประกอบหลักของระบบดับเพลิงดังนี้:</p>
 
-            <h3>มาตรฐานอ้างอิงหลัก</h3>
+            <h4>1. การเลือกปั๊มน้ำดับเพลิง (Fire Pump & Jockey Pump Selection)</h4>
+            <p><strong>- Fire Pump:</strong></p>
             <ul>
-                <li><strong>NFPA 13:</strong> Standard for the Installation of Sprinkler Systems. (มาตรฐานหลักในการติดตั้งระบบหัวกระจายน้ำดับเพลิง)</li>
-                <li><strong>NFPA 20:</strong> Standard for the Installation of Stationary Pumps for Fire Protection. (มาตรฐานการติดตั้งเครื่องสูบน้ำดับเพลิง)</li>
-                <li><strong>มาตรฐาน วสท.:</strong> มาตรฐานการป้องกันอัคคีภัย โดยวิศวกรรมสถานแห่งประเทศไทย ในพระบรมราชูปถัมภ์ ซึ่งอ้างอิงและปรับใช้ให้เข้ากับบริบทของประเทศไทย</li>
-                <li><strong>FM Global Data Sheets (e.g., FMDS 2-0):</strong> มาตรฐานจากสถาบันประกันภัยซึ่งมักมีข้อกำหนดที่เข้มงวดกว่าสำหรับอาคารหรือโรงงานที่มีความเสี่ยงสูง</li>
+                <li><strong>อัตราการไหล (Rated Flow):</strong> ใช้ค่า <strong class="print-dynamic-value" id="print-total-demand-gpm-ref"></strong> GPM (Total Demand) ที่คำนวณได้ เพื่อเลือกรุ่นของ Fire Pump ที่มีอัตราการไหลมาตรฐานไม่ต่ำกว่าค่านี้ (เช่น หากคำนวณได้ 650 GPM ควรเลือกใช้ปั๊มขนาด 750 GPM)</li>
+                <li><strong>แรงดัน (Rated Pressure):</strong> ค่า <strong class="print-dynamic-value" id="print-pressure-psi-ref"></strong> psi (End-Head Start Pressure) เป็นเพียงแรงดันขั้นต่ำที่ปลายท่อ ในการออกแบบจริงจะต้องคำนวณหาความดันสูญเสียในท่อ (Friction Loss) และแรงดันจากความสูงของอาคาร (Elevation Head) เพื่อหาแรงดันรวมที่ Fire Pump ต้องทำได้ ณ อัตราการไหลที่กำหนด ซึ่งทั้งหมดนี้ต้องเป็นไปตามมาตรฐาน <strong>NFPA 20</strong></li>
             </ul>
+             <p><strong>- Jockey Pump:</strong></p>
+             <ul>
+                 <li>ปั๊มรักษาแรงดัน (Jockey Pump) จะถูกเลือกให้มีอัตราการไหลน้อย (ปกติประมาณ 1% ของ Fire Pump) แต่ต้องทำแรงดันได้สูงกว่าเล็กน้อย เพื่อรักษาระดับแรงดันในเส้นท่อและป้องกันไม่ให้ Fire Pump เริ่มทำงานโดยไม่จำเป็น</li>
+             </ul>
+
+            <h4>2. การคำนวณขนาดถังเก็บน้ำสำรอง (Water Tank Sizing)</h4>
+            <p>ปริมาณน้ำสำรองที่ต้องกักเก็บ จะขึ้นอยู่กับ Total Demand และระยะเวลาการจ่ายน้ำตามที่มาตรฐานกำหนด</p>
+            <div class="formula">
+                ขนาดถัง (ลิตร) = ปริมาณน้ำรวม (LPM) &times; ระยะเวลาจ่ายน้ำ (นาที)
+            </div>
+             <ul>
+                 <li><strong>ระยะเวลาจ่ายน้ำ (Duration) ตาม NFPA 13:</strong>
+                    <ul>
+                        <li>Light Hazard: <strong>30 นาที</strong></li>
+                        <li>Ordinary Hazard: <strong>60 - 90 นาที</strong></li>
+                        <li>Extra Hazard: <strong>90 - 120 นาที</strong></li>
+                    </ul>
+                 </li>
+                 <li><strong>ตัวอย่าง:</strong> หากระบบเป็น Ordinary Hazard ต้องการน้ำ <strong class="print-dynamic-value" id="print-total-demand-lpm-ref"></strong> LPM และต้องสำรองน้ำนาน 90 นาที จะต้องมีถังเก็บน้ำขนาดอย่างน้อย <strong class="print-dynamic-value" id="print-tank-size-ref"></strong> ลิตร</li>
+             </ul>
         </div>
     </div>
     
     <div id="print-area" style="display: none;">
         <div id="print-header">
-            <h1>สรุปผลการคำนวณเบื้องต้นระบบดับเพลิงด้วยน้ำ</h1>
+            <h1>สรุปผลการคำนวณเบื้องต้นของระบบดับเพลิงด้วยน้ำ</h1>
             <p id="print-date"></p>
         </div>
-        <div class="print-wrapper">
-             <div id="print-inputs-wrapper"></div>
-             <div id="print-results-wrapper"></div>
-        </div>
-        <div id="print-guidance-wrapper"></div>
+        <div id="print-inputs-wrapper" class="print-section"></div>
+        <div id="print-results-wrapper" class="print-section"></div>
+        <div id="print-guidance-wrapper" class="print-section"></div>
     </div>
 
-    <footer>
-        <p>Disclaimer: This calculator provides preliminary estimates for educational and informational purposes only. It is not a substitute for professional engineering design. Always consult a qualified fire protection engineer and comply with all applicable codes and standards (NFPA, EIT, local regulations).</p>
-    </footer>
-
     <script>
-        // --- CONFIGURATION ---
-        const M_TO_FT = 3.28084;
-        const GPM_TO_LPM = 3.78541; // Corrected to standard conversion
-        const PSI_TO_BAR = 0.0689476;
-        const MIN_PRESSURE_PSI = 7.0;
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- CONFIGURATION ---
+            const M_TO_FT = 3.28084;
+            const FT_TO_M = 1 / M_TO_FT;
+            const GPM_TO_LPM = 3.785; // Corrected to standard conversion
+            const PSI_TO_BAR = 0.0689476;
+            const MIN_SPACING_M = 1.8; // 6 ft
+            const MIN_PRESSURE_PSI = 7.0;
 
-        const HAZARD_CONFIG = {
-            light: { name: 'Light Hazard', density: 0.10, area: 1500, hose: 100, maxSpacing: 4.6, maxArea: 20.9 },
-            ordinary1: { name: 'Ordinary Hazard Gr.1', density: 0.15, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1 },
-            ordinary2: { name: 'Ordinary Hazard Gr.2', density: 0.20, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1 },
-            extra1: { name: 'Extra Hazard Gr.1', density: 0.30, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3 },
-            extra2: { name: 'Extra Hazard Gr.2', density: 0.40, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3 },
-        };
-
-        // --- DOM ELEMENTS ---
-        const elements = {
-            hazardType: document.getElementById('hazard_type'),
-            density: document.getElementById('density'),
-            areaOfOperation: document.getElementById('area_of_operation'),
-            spacingS: document.getElementById('spacing_s'),
-            spacingL: document.getElementById('spacing_l'),
-            coverageAreaDisplay: document.getElementById('coverage_area_display'),
-            areaWarning: document.getElementById('area_warning'),
-            hoseDemand: document.getElementById('hose_demand'),
-            kFactor: document.getElementById('k_factor'),
-            overageFactor: document.getElementById('overage_factor'),
-            sprinklerDemandGpm: document.getElementById('sprinkler_demand_gpm'),
-            sprinklerDemandLpm: document.getElementById('sprinkler_demand_lpm'),
-            totalDemandGpm: document.getElementById('total_demand_gpm'),
-            totalDemandLpm: document.getElementById('total_demand_lpm'),
-            numSprinklers: document.getElementById('num_sprinklers'),
-            numSprinklersRounded: document.getElementById('num_sprinklers_rounded'),
-            endHeadFlowGpm: document.getElementById('end_head_flow_gpm'),
-            endHeadFlowLpm: document.getElementById('end_head_flow_lpm'),
-            endHeadPressurePsi: document.getElementById('end_head_pressure_psi'),
-            endHeadPressureBar: document.getElementById('end_head_pressure_bar'),
-            pressureWarning: document.getElementById('pressure_warning'),
-            pressureOk: document.getElementById('pressure_ok'),
-            suggestionBox: document.getElementById('suggestion_box'),
-            exportPdfBtn: document.getElementById('exportPdfBtn'),
-            guidanceTotalDemand: document.getElementById('guidance-total-demand'),
-            guidanceEndPressure: document.getElementById('guidance-end-pressure'),
-        };
-
-        // --- FUNCTIONS ---
-        function updateHazardDefaults() {
-            const hazard = HAZARD_CONFIG[elements.hazardType.value];
-            if (hazard) {
-                elements.density.value = hazard.density;
-                elements.areaOfOperation.value = hazard.area;
-                elements.hoseDemand.value = hazard.hose;
-                checkSpacingAndCoverage(true);
-            }
-        }
-
-        function checkSpacingAndCoverage(isHazardChange = false) {
-            const hazard = HAZARD_CONFIG[elements.hazardType.value];
-            const s_m = parseFloat(elements.spacingS.value) || 0;
-            const l_m = parseFloat(elements.spacingL.value) || 0;
-            const as_m2 = s_m * l_m;
-            const as_sqft = as_m2 * M_TO_FT * M_TO_FT;
-
-            elements.coverageAreaDisplay.value = `${as_sqft.toFixed(2)} sq.ft (${as_m2.toFixed(2)} m²)`;
-
-            const maxArea_m2 = hazard.maxArea;
-            const maxSpacing_m = hazard.maxSpacing;
-
-            let warningText = '';
-            if (s_m > maxSpacing_m || l_m > maxSpacing_m) {
-                warningText += `ระยะห่าง S หรือ L เกินค่าสูงสุดที่กำหนด (${maxSpacing_m} m). `;
-            }
-            if (as_m2 > maxArea_m2) {
-                warningText += `พื้นที่ครอบคลุมต่อหัว (${as_m2.toFixed(2)} m²) เกินค่าสูงสุดที่กำหนด (${maxArea_m2} m²).`;
-            }
-
-            elements.areaWarning.style.display = warningText ? 'block' : 'none';
-            elements.areaWarning.textContent = warningText;
-
-            if (isHazardChange) {
-                // Do not recalculate on hazard change, just update defaults
-                return;
-            }
-            calculateAndDisplay();
-        }
-
-        function calculateAndDisplay() {
-            // 1. Get Inputs
-            const density = parseFloat(elements.density.value) || 0;
-            const areaOp = parseFloat(elements.areaOfOperation.value) || 0;
-            const s_m = parseFloat(elements.spacingS.value) || 0;
-            const l_m = parseFloat(elements.spacingL.value) || 0;
-            const hoseDemand = parseFloat(elements.hoseDemand.value) || 0;
-            const kFactor = parseFloat(elements.kFactor.value) || 5.6;
-            const overage = parseFloat(elements.overageFactor.value) || 1.0;
-            const coverage_sqft = (s_m * l_m) * M_TO_FT * M_TO_FT;
-
-            // 2. Calculations
-            const sprinklerDemand = density * areaOp * overage;
-            const totalDemand = sprinklerDemand + hoseDemand;
-            const numSprinklers = coverage_sqft > 0 ? areaOp / coverage_sqft : 0;
-            const numSprinklersRounded = Math.ceil(numSprinklers);
-            const endHeadFlow = density * coverage_sqft;
-            const endHeadPressure = kFactor > 0 ? Math.pow(endHeadFlow / kFactor, 2) : 0;
-            
-            const results = {
-                sprinkler_demand_gpm: sprinklerDemand,
-                total_demand_gpm: totalDemand,
-                num_sprinklers: numSprinklers,
-                num_sprinklers_rounded: numSprinklersRounded,
-                end_head_flow_gpm: endHeadFlow,
-                end_head_pressure_psi: endHeadPressure
+            const HAZARD_CONFIG = {
+                light: { name: 'Light Hazard', density: 0.10, area: 1500, hose: 100, maxSpacing: 4.6, maxArea: 20.9, duration: 30 },
+                ordinary1: { name: 'Ordinary Hazard Gr.1', density: 0.15, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1, duration: 90 },
+                ordinary2: { name: 'Ordinary Hazard Gr.2', density: 0.20, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1, duration: 90 },
+                extra1: { name: 'Extra Hazard Gr.1', density: 0.30, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3, duration: 120 },
+                extra2: { name: 'Extra Hazard Gr.2', density: 0.40, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3, duration: 120 },
             };
 
-            // 3. Display Results
-            displayResults(results);
+            // --- DOM ELEMENTS ---
+            const els = {
+                hazardType: document.getElementById('hazard_type'),
+                density: document.getElementById('density'),
+                areaOfOperation: document.getElementById('area_of_operation'),
+                spacingS: document.getElementById('spacing_s'),
+                spacingL: document.getElementById('spacing_l'),
+                spacingSGuidance: document.getElementById('spacing_s_guidance'),
+                spacingLGuidance: document.getElementById('spacing_l_guidance'),
+                coverageAreaDisplay: document.getElementById('coverage_area_display'),
+                areaWarning: document.getElementById('area_warning'),
+                hoseDemand: document.getElementById('hose_demand'),
+                kFactor: document.getElementById('k_factor'),
+                overageFactor: document.getElementById('overage_factor'),
+                sprinklerDemandGpm: document.getElementById('sprinkler_demand_gpm'),
+                sprinklerDemandLpm: document.getElementById('sprinkler_demand_lpm'),
+                totalDemandGpm: document.getElementById('total_demand_gpm'),
+                totalDemandLpm: document.getElementById('total_demand_lpm'),
+                numSprinklers: document.getElementById('num_sprinklers'),
+                numSprinklersRounded: document.getElementById('num_sprinklers_rounded'),
+                endHeadFlowGpm: document.getElementById('end_head_flow_gpm'),
+                endHeadFlowLpm: document.getElementById('end_head_flow_lpm'),
+                endHeadPressurePsi: document.getElementById('end_head_pressure_psi'),
+                endHeadPressureBar: document.getElementById('end_head_pressure_bar'),
+                pressureWarning: document.getElementById('pressure_warning'),
+                pressureOk: document.getElementById('pressure_ok'),
+                suggestionBox: document.getElementById('suggestion_box'),
+                exportPdfBtn: document.getElementById('exportPdfBtn'),
+                exportExcelBtn: document.getElementById('exportExcelBtn')
+            };
 
-            // 4. Update Guidance Text
-            updateGuidanceText(results);
-            
-            // 5. Update content for printing
-            updatePrintContent(results);
-        }
-
-        function displayResults(r) {
-            elements.sprinklerDemandGpm.textContent = `${r.sprinkler_demand_gpm.toFixed(0)} GPM`;
-            elements.sprinklerDemandLpm.textContent = `(${(r.sprinkler_demand_gpm * GPM_TO_LPM).toFixed(0)} LPM)`;
-            elements.totalDemandGpm.textContent = `${r.total_demand_gpm.toFixed(0)} GPM`;
-            elements.totalDemandLpm.textContent = `(${(r.total_demand_gpm * GPM_TO_LPM).toFixed(0)} LPM)`;
-            elements.numSprinklers.textContent = `${r.num_sprinklers.toFixed(2)}`;
-            elements.numSprinklersRounded.textContent = `(ต้องใช้ ${r.num_sprinklers_rounded} หัว)`;
-            elements.endHeadFlowGpm.textContent = `${r.end_head_flow_gpm.toFixed(2)} GPM`;
-            elements.endHeadFlowLpm.textContent = `(${(r.end_head_flow_gpm * GPM_TO_LPM).toFixed(2)} LPM)`;
-            elements.endHeadPressurePsi.textContent = `${r.end_head_pressure_psi.toFixed(2)} psi`;
-            elements.endHeadPressureBar.textContent = `(${(r.end_head_pressure_psi * PSI_TO_BAR).toFixed(2)} bar)`;
-
-            // Pressure Check
-            elements.suggestionBox.style.display = 'none';
-            if (r.end_head_pressure_psi < MIN_PRESSURE_PSI) {
-                elements.pressureWarning.style.display = 'block';
-                elements.pressureOk.style.display = 'none';
-                
-                let suggestions = '<strong>คำแนะนำ:</strong><ul>';
-                const requiredK = r.end_head_flow_gpm / Math.sqrt(MIN_PRESSURE_PSI);
-                suggestions += `<li>หากต้องการแรงดันที่ ${MIN_PRESSURE_PSI} psi จะต้องมีอัตราการไหลที่หัวอย่างน้อย ${r.end_head_flow_gpm.toFixed(2)} GPM.</li>`;
-                suggestions += `<li>ลองพิจารณาเปลี่ยน K-Factor ให้มีค่ามากขึ้น (เช่น ${findNextK(kFactor)}) ซึ่งจะช่วยลดแรงดันที่ต้องการ</li>`;
-                suggestions += `<li>หรือลดระยะห่างระหว่างหัว (S/L) เพื่อลดพื้นที่ครอบคลุม (As) ซึ่งจะลดอัตราการไหลที่หัวสุดท้าย (q) และลดแรงดันที่ต้องการลง</li></ul>`;
-
-                elements.suggestionBox.innerHTML = suggestions;
-                elements.suggestionBox.style.display = 'block';
-
-            } else {
-                elements.pressureWarning.style.display = 'none';
-                elements.pressureOk.style.display = 'block';
-            }
-        }
-        
-        function updateGuidanceText(r) {
-            elements.guidanceTotalDemand.textContent = r.total_demand_gpm.toFixed(0);
-            elements.guidanceEndPressure.textContent = r.end_head_pressure_psi.toFixed(2);
-        }
-
-        function findNextK(currentK) {
-            const kValues = [5.6, 8.0, 11.2];
-            const currentIndex = kValues.indexOf(parseFloat(currentK));
-            if (currentIndex > -1 && currentIndex < kValues.length - 1) {
-                return kValues[currentIndex + 1];
-            }
-            return '11.2+';
-        }
-
-        function updatePrintContent(results) {
-             const createPrintField = (label, eng, value, unit, subValue, subUnit) => `
-                <div class="result-group">
-                    <div class="label">${label}<span class="label-eng">${eng}</span></div>
-                    <div class="result-value">
-                        <span>${value} ${unit}</span>
-                        ${subValue ? `<span class="metric">(${subValue} ${subUnit})</span>` : ''}
-                    </div>
-                </div>`;
-
-            // Inputs
-            const inputsWrapper = document.getElementById('print-inputs-wrapper');
-            const hazard = HAZARD_CONFIG[elements.hazardType.value];
-            inputsWrapper.innerHTML = `
-                <fieldset class="print-fieldset">
-                    <legend>ข้อมูลนำเข้า</legend>
-                    ${createPrintField('ประเภทพื้นที่', 'Hazard', hazard.name, '')}
-                    ${createPrintField('ความหนาแน่น', 'Density', elements.density.value, 'gpm/sq.ft')}
-                    ${createPrintField('พื้นที่ปฏิบัติงาน', 'Area of Op.', elements.areaOfOperation.value, 'sq.ft')}
-                    ${createPrintField('ระยะห่าง (S x L)', 'Spacing', `${elements.spacingS.value}m x ${elements.spacingL.value}m`, '')}
-                    ${createPrintField('พื้นที่ต่อหัว', 'Area/Sprinkler', elements.coverageAreaDisplay.value, '')}
-                    ${createPrintField('น้ำสำรองสายฉีด', 'Hose Demand', elements.hoseDemand.value, 'gpm')}
-                    ${createPrintField('K-Factor', 'K-Factor', elements.kFactor.value, '')}
-                </fieldset>`;
-
-            // Results
-            const resultsWrapper = document.getElementById('print-results-wrapper');
-            resultsWrapper.innerHTML = `
-                <fieldset class="print-fieldset">
-                    <legend>ผลการคำนวณ</legend>
-                    ${createPrintField('ปริมาณน้ำระบบ', 'Sprinkler Demand', results.sprinkler_demand_gpm.toFixed(0), 'GPM', (results.sprinkler_demand_gpm * GPM_TO_LPM).toFixed(0), 'LPM')}
-                    ${createPrintField('ปริมาณน้ำรวม', 'Total Demand', results.total_demand_gpm.toFixed(0), 'GPM', (results.total_demand_gpm * GPM_TO_LPM).toFixed(0), 'LPM')}
-                    ${createPrintField('จำนวนหัวทำงาน', '# Sprinklers', results.num_sprinklers.toFixed(2), 'หัว', `(ใช้ ${results.num_sprinklers_rounded})`, '')}
-                    ${createPrintField('Flow หัวสุดท้าย', 'End-Head Flow', results.end_head_flow_gpm.toFixed(2), 'GPM', (results.end_head_flow_gpm * GPM_TO_LPM).toFixed(2), 'LPM')}
-                    ${createPrintField('Pressure หัวสุดท้าย', 'End-Head Pressure', results.end_head_pressure_psi.toFixed(2), 'psi', (results.end_head_pressure_psi * PSI_TO_BAR).toFixed(2), 'bar')}
-                </fieldset>`;
-            
-             // Guidance section
-            const guidanceContent = document.querySelector('.guidance-container .content').cloneNode(true);
-            const guidanceWrapper = document.getElementById('print-guidance-wrapper');
-            guidanceWrapper.innerHTML = ''; // Clear previous
-            guidanceWrapper.appendChild(guidanceContent);
-
-            // Update the dynamic values within the cloned print content
-            const printGuidanceTotalDemand = guidanceWrapper.querySelector('#guidance-total-demand');
-            const printGuidanceEndPressure = guidanceWrapper.querySelector('#guidance-end-pressure');
-            
-            if (printGuidanceTotalDemand) printGuidanceTotalDemand.textContent = results.total_demand_gpm.toFixed(0);
-            if (printGuidanceEndPressure) printGuidanceEndPressure.textContent = results.end_head_pressure_psi.toFixed(2);
-            
-            document.getElementById('print-date').textContent = `วันที่คำนวณ: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric'})}`;
-        }
-        
-        // --- EVENT LISTENERS ---
-        elements.hazardType.addEventListener('change', () => {
-            updateHazardDefaults();
-            calculateAndDisplay();
-        });
-        
-        const inputsToRecalculate = [
-            elements.density, elements.areaOfOperation, elements.spacingS,
-            elements.spacingL, elements.hoseDemand, elements.kFactor, elements.overageFactor
-        ];
-
-        inputsToRecalculate.forEach(input => {
-            input.addEventListener('input', () => {
-                if (input === elements.spacingS || input === elements.spacingL) {
-                    checkSpacingAndCoverage();
-                } else {
-                    calculateAndDisplay();
+            // --- FUNCTIONS ---
+            function updateHazardDefaults() {
+                const hazard = els.hazardType.value;
+                const config = HAZARD_CONFIG[hazard];
+                if (config) {
+                    els.density.value = config.density.toFixed(2);
+                    els.areaOfOperation.value = config.area;
+                    els.hoseDemand.value = config.hose;
+                    updateSpacingGuidance();
                 }
+                calculateAll();
+            }
+            
+            function mToFt(m) { return m * M_TO_FT; }
+            function ftToM(ft) { return ft * FT_TO_M; }
+            function gpmToLpm(gpm) { return gpm * GPM_TO_LPM; }
+            function psiToBar(psi) { return psi * PSI_TO_BAR; }
+
+            function calculateAll() {
+                // 1. Get all input values
+                const hazard = els.hazardType.value;
+                const density = parseFloat(els.density.value) || 0;
+                const areaOfOp = parseFloat(els.areaOfOperation.value) || 0;
+                const spacingS_m = parseFloat(els.spacingS.value) || 0;
+                const spacingL_m = parseFloat(els.spacingL.value) || 0;
+                const hose = parseInt(els.hoseDemand.value, 10) || 0;
+                const kFactor = parseFloat(els.kFactor.value) || 0;
+                const overageFactor = parseFloat(els.overageFactor.value) || 1.0;
+
+                // 2. Intermediate Calculations
+                const coverageArea_m2 = spacingS_m * spacingL_m;
+                const coverageArea_sqft = coverageArea_m2 * (M_TO_FT * M_TO_FT);
+                
+                let numSprinklers = (areaOfOp / coverageArea_sqft) || 0;
+                if (numSprinklers < 1 && areaOfOp > 0) numSprinklers = 1; // Ensure at least one sprinkler if area is specified
+                const numSprinklersRounded = Math.ceil(numSprinklers);
+
+                const sprinklerDemandGpm = density * areaOfOp * overageFactor;
+                const totalDemandGpm = sprinklerDemandGpm + hose;
+                const endHeadFlowGpm = density * coverageArea_sqft;
+                const endHeadPressurePsi = kFactor > 0 ? Math.pow(endHeadFlowGpm / kFactor, 2) : 0;
+                
+                const config = HAZARD_CONFIG[hazard];
+                const duration = config ? config.duration : 0;
+                const tankSizeLiters = gpmToLpm(totalDemandGpm) * duration;
+
+                // 3. Update UI - Main Results
+                els.coverageAreaDisplay.value = `${coverageArea_m2.toFixed(2)} m² / ${coverageArea_sqft.toFixed(2)} sq.ft`;
+                els.sprinklerDemandGpm.textContent = `${sprinklerDemandGpm.toFixed(2)} GPM`;
+                els.sprinklerDemandLpm.textContent = `(${gpmToLpm(sprinklerDemandGpm).toFixed(2)} LPM)`;
+                els.totalDemandGpm.textContent = `${totalDemandGpm.toFixed(2)} GPM`;
+                els.totalDemandLpm.textContent = `(${gpmToLpm(totalDemandGpm).toFixed(2)} LPM)`;
+                els.numSprinklers.textContent = `${numSprinklers.toFixed(2)}`;
+                els.numSprinklersRounded.textContent = `(ปัดขึ้น ${numSprinklersRounded} หัว)`;
+                els.endHeadFlowGpm.textContent = `${endHeadFlowGpm.toFixed(2)} GPM`;
+                els.endHeadFlowLpm.textContent = `(${gpmToLpm(endHeadFlowGpm).toFixed(2)} LPM)`;
+                els.endHeadPressurePsi.textContent = `${endHeadPressurePsi.toFixed(2)} psi`;
+                els.endHeadPressureBar.textContent = `(${psiToBar(endHeadPressurePsi).toFixed(2)} bar)`;
+
+                // 4. Update UI - Warnings and Suggestions
+                updateAreaWarning(coverageArea_m2);
+                updatePressureWarning(endHeadPressurePsi, kFactor, endHeadFlowGpm);
+                
+                // 5. Update Guidance Section
+                updateGuidanceValues({
+                    totalDemandGpm: totalDemandGpm.toFixed(2),
+                    totalDemandLpm: gpmToLpm(totalDemandGpm).toFixed(2),
+                    endHeadPressurePsi: endHeadPressurePsi.toFixed(2),
+                    tankSize: tankSizeLiters.toLocaleString('th-TH', { maximumFractionDigits: 0 })
+                });
+            }
+
+            function updateSpacingGuidance() {
+                const config = HAZARD_CONFIG[els.hazardType.value];
+                if (!config) return;
+                
+                const maxSpacingFt = mToFt(config.maxSpacing);
+                const guidanceText = `สูงสุด ${config.maxSpacing} m (~${maxSpacingFt.toFixed(1)} ft)`;
+                els.spacingSGuidance.textContent = guidanceText;
+                els.spacingLGuidance.textContent = guidanceText;
+            }
+
+            function updateAreaWarning(area_m2) {
+                const config = HAZARD_CONFIG[els.hazardType.value];
+                if (!config) return;
+
+                const maxArea = config.maxArea;
+                const maxAreaFt = maxArea * M_TO_FT * M_TO_FT;
+                
+                if (area_m2 > maxArea) {
+                    els.areaWarning.innerHTML = `<strong>คำเตือน:</strong> พื้นที่ครอบคลุมเกินค่าสูงสุดที่กำหนดสำหรับ ${config.name} (${maxArea.toFixed(1)} m² หรือ ~${maxAreaFt.toFixed(0)} sq.ft)`;
+                    els.areaWarning.style.display = 'block';
+                } else {
+                    els.areaWarning.style.display = 'none';
+                }
+            }
+            
+            function updatePressureWarning(pressure, k, q) {
+                const isLow = pressure < MIN_PRESSURE_PSI && pressure > 0;
+                els.pressureWarning.style.display = isLow ? 'block' : 'none';
+                els.pressureOk.style.display = pressure >= MIN_PRESSURE_PSI ? 'block' : 'none';
+                
+                if (isLow && k > 0) {
+                    const requiredK = q / Math.sqrt(MIN_PRESSURE_PSI);
+                    let suggestionText = `<strong>ข้อเสนอแนะ:</strong> เพื่อให้ได้แรงดันขั้นต่ำ ${MIN_PRESSURE_PSI} psi ควรพิจารณา:<ul>`;
+                    suggestionText += `<li>1. เพิ่มค่า K-Factor ให้มากกว่า ${requiredK.toFixed(2)}</li>`;
+                    suggestionText += `<li>2. ลดระยะห่างของหัวสปริงเกอร์เพื่อลดอัตราการไหล (q) ที่หัวสุดท้าย</li></ul>`;
+                    
+                    els.suggestionBox.innerHTML = suggestionText;
+                    els.suggestionBox.style.display = 'block';
+                } else {
+                    els.suggestionBox.style.display = 'none';
+                }
+            }
+            
+            function updateGuidanceValues(values) {
+                document.getElementById('print-total-demand-gpm-ref').textContent = values.totalDemandGpm;
+                document.getElementById('print-pressure-psi-ref').textContent = values.endHeadPressurePsi;
+                document.getElementById('print-total-demand-lpm-ref').textContent = values.totalDemandLpm;
+                document.getElementById('print-tank-size-ref').textContent = values.tankSize;
+            }
+
+            function generateCsv() {
+                const headers = [
+                    "พารามิเตอร์ (Parameter)", "ค่า (Value)", "หน่วย (Unit)",
+                    "Parameter (English)", "Value", "Unit"
+                ];
+                
+                const data = [
+                    ["ประเภทพื้นที่อันตราย", HAZARD_CONFIG[els.hazardType.value].name, "-", "Hazard Classification", HAZARD_CONFIG[els.hazardType.value].name, "-"],
+                    ["ความหนาแน่นการฉีดน้ำ", els.density.value, "gpm/sq.ft", "Density (Ds)", els.density.value, "gpm/sq.ft"],
+                    ["พื้นที่ปฏิบัติงาน", els.areaOfOperation.value, "sq.ft", "Area of Operation (Ao)", els.areaOfOperation.value, "sq.ft"],
+                    ["ระยะห่างระหว่างหัว (S)", els.spacingS.value, "m", "Spacing (S)", els.spacingS.value, "m"],
+                    ["ระยะห่างระหว่างกิ่ง (L)", els.spacingL.value, "m", "Spacing (L)", els.spacingL.value, "m"],
+                    ["K-Factor", els.kFactor.value, "-", "K-Factor", els.kFactor.value, "-"],
+                    ["น้ำสำรองสายฉีด", els.hoseDemand.value, "gpm", "Hose Demand", els.hoseDemand.value, "gpm"],
+                    [], // Spacer
+                    ["ผลการคำนวณ", "Result", "", "Calculation Result", "Result", ""],
+                    ["ปริมาณน้ำที่ระบบต้องการ", els.sprinklerDemandGpm.textContent.replace(' GPM', ''), "GPM", "Sprinkler System Demand", els.sprinklerDemandGpm.textContent.replace(' GPM', ''), "GPM"],
+                    ["ปริมาณน้ำรวมทั้งระบบ", els.totalDemandGpm.textContent.replace(' GPM', ''), "GPM", "Total Demand", els.totalDemandGpm.textContent.replace(' GPM', ''), "GPM"],
+                    ["จำนวนหัวสปริงเกอร์", els.numSprinklersRounded.textContent.replace('(ปัดขึ้น ', '').replace(' หัว)', ''), "หัว", "Number of Sprinklers", els.numSprinklersRounded.textContent.replace('(ปัดขึ้น ', '').replace(' หัว)', ''), "heads"],
+                    ["อัตราการไหลที่หัวสุดท้าย", els.endHeadFlowGpm.textContent.replace(' GPM', ''), "GPM", "End-Head Flow", els.endHeadFlowGpm.textContent.replace(' GPM', ''), "GPM"],
+                    ["แรงดันเริ่มต้นที่หัวสุดท้าย", els.endHeadPressurePsi.textContent.replace(' psi', ''), "psi", "End-Head Start Pressure", els.endHeadPressurePsi.textContent.replace(' psi', ''), "psi"],
+                ];
+                
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Add BOM for Excel
+                csvContent += headers.join(",") + "\r\n";
+                data.forEach(rowArray => {
+                    let row = rowArray.join(",");
+                    csvContent += row + "\r\n";
+                });
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "fire_protection_calculation.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            function preparePrintContent() {
+                // Set Print Date
+                document.getElementById('print-date').textContent = `วันที่จัดทำ: ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+
+                // Clone inputs and results into the print area
+                const inputsContent = document.getElementById('inputs').querySelector('fieldset').cloneNode(true);
+                const resultsContent = document.getElementById('results').querySelector('fieldset').cloneNode(true);
+                
+                // Clean up clones for printing
+                inputsContent.querySelectorAll('.tooltip-icon, .guidance-text, .info-box').forEach(el => el.remove());
+                resultsContent.querySelectorAll('.pressure-warning, .pressure-ok, .suggestion-box, .export-section').forEach(el => el.remove());
+                
+                // Set print area class for styling
+                inputsContent.className = 'print-fieldset';
+                resultsContent.className = 'print-fieldset';
+
+                // Populate print wrappers
+                const inputsWrapper = document.getElementById('print-inputs-wrapper');
+                const resultsWrapper = document.getElementById('print-results-wrapper');
+                const guidanceWrapper = document.getElementById('print-guidance-wrapper');
+                
+                inputsWrapper.innerHTML = '';
+                resultsWrapper.innerHTML = '';
+                guidanceWrapper.innerHTML = '';
+
+                inputsWrapper.appendChild(inputsContent);
+                resultsWrapper.appendChild(resultsContent);
+
+                // Clone and add the guidance section
+                const guidanceContent = document.getElementById('guidance-section').querySelector('.content').cloneNode(true);
+                guidanceWrapper.appendChild(guidanceContent);
+            }
+
+            // --- EVENT LISTENERS ---
+            els.hazardType.addEventListener('change', updateHazardDefaults);
+            [els.density, els.areaOfOperation, els.spacingS, els.spacingL, els.hoseDemand, els.kFactor, els.overageFactor].forEach(el => {
+                el.addEventListener('input', calculateAll);
             });
-        });
+            
+            els.exportExcelBtn.addEventListener('click', generateCsv);
 
-        elements.exportPdfBtn.addEventListener('click', () => {
-            updatePrintContent(calculateAndDisplay()); // Ensure content is fresh before printing
-            window.print();
-        });
+            els.exportPdfBtn.addEventListener('click', () => {
+                preparePrintContent();
+                window.print();
+            });
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
+            // --- INITIALIZATION ---
             updateHazardDefaults();
-            calculateAndDisplay();
         });
     </script>
+
 </body>
 </html>
