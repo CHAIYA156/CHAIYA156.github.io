@@ -212,7 +212,7 @@
             margin: 5px;
             transition: background-color 0.3s;
         }
-        .export-section button:hover {
+        .export-section button.pdf:hover {
             background-color: var(--secondary-color);
         }
         .export-section button.excel {
@@ -232,14 +232,6 @@
         .guidance-container li { margin-bottom: 10px; }
         .formula { background-color: #eef; font-family: monospace; padding: 15px; border-radius: 6px; border: 1px solid #dbe3f8; text-align: center; margin: 15px 0; font-size: 1.1em; overflow-x: auto; }
         
-        .dynamic-value {
-            font-weight: bold;
-            background-color: #FFFFCC;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid #E6D87A;
-        }
-
         /* Print Styles */
         @media print {
             body {
@@ -273,10 +265,6 @@
             .print-fieldset .result-value { color: #333 !important; }
             #print-guidance-wrapper h2, #print-guidance-wrapper h3 { color: black !important; border-color: #ccc !important; }
             #print-guidance-wrapper .formula { border: 1px solid #ccc !important; background-color: #f9f9f9 !important; }
-            .dynamic-value {
-                border: 1px solid #ccc !important;
-                background-color: #f0f0f0 !important;
-            }
         }
     </style>
 </head>
@@ -419,7 +407,7 @@
                         <div id="suggestion_box" class="suggestion-box"></div>
                     </div>
                     <div class="export-section">
-                        <button id="exportPdfBtn">📄 ส่งออกเป็น PDF</button>
+                        <button id="exportPdfBtn" class="pdf">📄 ส่งออกเป็น PDF</button>
                         <button id="exportExcelBtn" class="excel">📊 ส่งออกเป็น Excel (.csv)</button>
                     </div>
                 </fieldset>
@@ -447,8 +435,8 @@
             <h4>1. การเลือกปั๊มน้ำดับเพลิง (Fire Pump & Jockey Pump Selection)</h4>
             <p><strong>- Fire Pump:</strong></p>
             <ul>
-                <li><strong>อัตราการไหล (Rated Flow):</strong> ใช้ค่า <strong class="dynamic-value" id="pump-demand-gpm"></strong> GPM (Total Demand) ที่คำนวณได้ เพื่อเลือกรุ่นของ Fire Pump ที่มีอัตราการไหลมาตรฐานไม่ต่ำกว่าค่านี้ (เช่น หากคำนวณได้ 650 GPM ควรเลือกใช้ปั๊มขนาด 750 GPM)</li>
-                <li><strong>แรงดัน (Rated Pressure):</strong> ค่า <strong class="dynamic-value" id="pump-pressure-psi"></strong> psi (End-Head Start Pressure) เป็นเพียงแรงดันขั้นต่ำที่ปลายท่อ ในการออกแบบจริงจะต้องคำนวณหาความดันสูญเสียในท่อ (Friction Loss) และแรงดันจากความสูงของอาคาร (Elevation Head) เพื่อหาแรงดันรวมที่ Fire Pump ต้องทำได้ ณ อัตราการไหลที่กำหนด ซึ่งทั้งหมดนี้ต้องเป็นไปตามมาตรฐาน <strong>NFPA 20</strong></li>
+                <li><strong>อัตราการไหล (Rated Flow):</strong> ใช้ค่า <strong id="pump-demand-gpm"></strong> GPM (Total Demand) ที่คำนวณได้ เพื่อเลือกรุ่นของ Fire Pump ที่มีอัตราการไหลมาตรฐานไม่ต่ำกว่าค่านี้ (เช่น หากคำนวณได้ 650 GPM ควรเลือกใช้ปั๊มขนาด 750 GPM)</li>
+                <li><strong>แรงดัน (Rated Pressure):</strong> ค่า <strong id="pump-pressure-psi"></strong> psi (End-Head Start Pressure) เป็นเพียงแรงดันขั้นต่ำที่ปลายท่อ ในการออกแบบจริงจะต้องคำนวณหาความดันสูญเสียในท่อ (Friction Loss) และแรงดันจากความสูงของอาคาร (Elevation Head) เพื่อหาแรงดันรวมที่ Fire Pump ต้องทำได้ ณ อัตราการไหลที่กำหนด ซึ่งทั้งหมดนี้ต้องเป็นไปตามมาตรฐาน <strong>NFPA 20</strong></li>
             </ul>
              <p><strong>- Jockey Pump:</strong></p>
              <ul>
@@ -469,7 +457,7 @@
                     </ul>
                  </li>
                  <li>
-                     <strong>ตัวอย่าง:</strong> หากระบบเป็น <strong id="example-hazard-name"></strong> ต้องการน้ำ <strong class="dynamic-value" id="example-lpm"></strong> LPM และต้องสำรองน้ำนาน <strong id="example-duration"></strong> นาที จะต้องมีถังเก็บน้ำขนาดอย่างน้อย <strong class="dynamic-value" id="example-tank-size"></strong> ลิตร
+                     <strong>ตัวอย่าง:</strong> หากระบบเป็น <strong id="example-hazard-name"></strong> ต้องการน้ำ <strong id="example-lpm"></strong> LPM และต้องสำรองน้ำนาน <strong id="example-duration"></strong> นาที จะต้องมีถังเก็บน้ำขนาดอย่างน้อย <strong id="example-tank-size"></strong> ลิตร
                  </li>
              </ul>
         </div>
@@ -497,10 +485,10 @@
 
             const HAZARD_CONFIG = {
                 light: { name: 'Light Hazard', density: 0.10, area: 1500, hose: 100, maxSpacing: 4.6, maxArea: 20.9, duration: 30 },
-                ordinary1: { name: 'Ordinary Hazard Gr. 1', density: 0.15, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1, duration: 90 },
-                ordinary2: { name: 'Ordinary Hazard Gr. 2', density: 0.20, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1, duration: 90 },
-                extra1: { name: 'Extra Hazard Gr. 1', density: 0.30, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3, duration: 120 },
-                extra2: { name: 'Extra Hazard Gr. 2', density: 0.40, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3, duration: 120 },
+                ordinary1: { name: 'Ordinary Hazard Group 1', density: 0.15, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1, duration: 90 },
+                ordinary2: { name: 'Ordinary Hazard Group 2', density: 0.20, area: 1500, hose: 250, maxSpacing: 4.6, maxArea: 12.1, duration: 90 },
+                extra1: { name: 'Extra Hazard Group 1', density: 0.30, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3, duration: 120 },
+                extra2: { name: 'Extra Hazard Group 2', density: 0.40, area: 2500, hose: 500, maxSpacing: 3.7, maxArea: 9.3, duration: 120 },
             };
 
             // --- DOM ELEMENTS ---
@@ -566,7 +554,7 @@
                 const coverageArea_m2 = spacingS_m * spacingL_m;
                 const coverageArea_sqft = mToFt(mToFt(coverageArea_m2));
                 
-                let numSprinklers = (areaOfOp / coverageArea_sqft) || 0;
+                let numSprinklers = (coverageArea_sqft > 0) ? (areaOfOp / coverageArea_sqft) : 0;
                 if (numSprinklers < 1 && areaOfOp > 0) numSprinklers = 1;
                 const numSprinklersRounded = Math.ceil(numSprinklers);
 
